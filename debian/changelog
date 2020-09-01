@@ -1,3 +1,15 @@
+kylin-installer (0.0.7kord) v100; urgency=medium
+
+  * 修改无法安装包含中文字符包的bug
+
+ -- lijiang (rain) <lijiang@kylinos.cn>  Tue, 01 Sep 2020 16:56:28 +0800
+
+kylin-installer (0.0.6kord) v100; urgency=medium
+
+  * 修改包名
+
+ -- lijiang (rain) <lijiang@kylinos.cn>  Mon, 31 Aug 2020 20:00:07 +0800
+
 kylin-installer (0.0.5kord) v100; urgency=medium
 
   * 新增dbus后台，支持安装、卸载

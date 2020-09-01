@@ -23,8 +23,7 @@
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ### END LICENSE
-
-
+import random
 
 import dbus
 import os
@@ -145,15 +144,26 @@ class InstallBackend(QObject):
 
 
     def install_debfile(self, path):
-        debcache_dir = os.path.join(os.path.expanduser("~"), ".cache", "uksc", "debfile")
-        if(os.path.exists(debcache_dir) == False):
+        debcache_dir = os.path.join(os.path.expanduser("~"), ".cache", "kylin-installer", "debfile")
+        if (os.path.exists(debcache_dir) == False):
             os.makedirs(debcache_dir)
-        if(os.path.exists(path)):
-            shutil.copy(path, debcache_dir)
-        debcache_path = os.path.join(debcache_dir,os.path.split(path)[1])
+        for char in path:
+            if u'\u4e00' <= char <= u'\u9fa5':  #判断路径是否存在中文
+                filename = self.random_char(10)  #修改包名的为非中文
+                debcache_path = os.path.join(debcache_dir, filename+".deb")
+                shutil.copy(path, debcache_path)
+                return self.call_dbus_iface(INSTALLDEBFILE, debcache_path)
+        return self.call_dbus_iface(INSTALLDEBFILE, path)
 
-        return self.call_dbus_iface(INSTALLDEBFILE, debcache_path)
-
+    #
+    # 函数：生成随机字符串
+    #
+    def random_char(self, num):
+        charlist = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+        character = ''
+        for i in range(num):
+            character += random.choice(charlist)
+        return character
     #
     # 函数：apt调用的返回信号响应
     #
