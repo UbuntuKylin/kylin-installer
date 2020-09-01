@@ -1,0 +1,1 @@
+chmod 755 /usr/lib/python3/dist-packages/kylin_packages_manager_tools_daemon/start_systemdbus.py

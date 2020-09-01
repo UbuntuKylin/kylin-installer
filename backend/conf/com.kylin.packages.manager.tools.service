@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=com.kylin.packages.manager.tools
+Exec=/usr/bin/kylin-packages-manager-tools-daemon
+User=root

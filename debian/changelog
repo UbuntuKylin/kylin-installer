@@ -1,0 +1,31 @@
+kylin-installer (0.0.5kord) v100; urgency=medium
+
+  * 新增dbus后台，支持安装、卸载
+  * 新增label的tooltips
+  * 新增单例检测
+
+ -- lijiang (rain) <lijiang@kylinos.cn>  Mon, 31 Aug 2020 20:00:07 +0800
+
+kylin-installer (0.0.4kord) v100; urgency=medium
+
+  * 去除菜单栏显示
+
+ -- dengnan <dengnan@kylinos.cn>  Fri, 21 Aug 2020 17:31:30 +0800
+
+kylin-installer (0.0.3kord) v100; urgency=medium
+
+  * 修改主文件权限 
+
+ -- dengnan <dengnan@kylinos.cn>  Fri, 07 Aug 2020 21:38:00 +0800
+
+kylin-installer (0.0.2kord) v100; urgency=medium
+
+  * deb包安装软件创建初始化
+
+ -- dengnan <dengnan@kylinos.cn>  Fri, 07 Aug 2020 19:13:08 +0800
+
+kylin-installer (0.0.1kord) trusty; urgency=low
+
+  * Initial release (LP: #1293299).
+
+ -- Jun Ma <majun@ubuntukylin.com>  Thu, 20 Mar 2014 10:14:56 +0800

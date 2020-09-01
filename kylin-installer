@@ -1,0 +1,26 @@
+#!/bin/sh
+
+if [ $# = 0 ]; then
+	echo "normal start"
+	cd /usr/share/kylin-installer
+	exec ./kylin-installer.py
+elif [ $1 = "restart" ]; then
+        echo "restart"
+        sleep 1
+        cd /usr/share/kylin-installer/
+        exec ./kylin-installer.py
+else
+        if [ $1 = "-quiet" ]; then
+                echo "quiet start"
+                cd /usr/share/kylin-installer/
+                exec ./kylin-installer.py -quiet
+        elif [ $1 = "-remove" ]; then
+                cd /usr/share/kylin-installer/
+                exec ./kylin-installer.py $1 $2
+        else
+                cd /usr/share/kylin-installer/
+                exec ./kylin-installer.py $1
+        fi
+fi
+
+
