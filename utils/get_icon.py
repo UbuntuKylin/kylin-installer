@@ -36,22 +36,20 @@ UK_SYSTEM_ICON_48_PATH = "/usr/share/icons/ukui-icon-theme-default/48x48/apps/"
 DEBFILE_ICON_PATH="/usr/share/ubuntu-kylin-software-center/data/icons/"
 
 def get_icon_path(app_name):
-    if(os.path.isfile(KYLIN_SYSTEM_ICON_48_PATH + str(app_name) + ".png")):
-        return KYLIN_SYSTEM_ICON_48_PATH + str(app_name) + ".png"
-    elif(os.path.isfile(UK_SYSTEM_ICON_48_PATH + str(app_name) + ".png")):
-        return UK_SYSTEM_ICON_48_PATH + str(app_name) + ".png"
-    elif(os.path.isfile(UBUNTUKYLIN_CACHE_ICON_PATH + str(app_name) + ".png")):
-        return UBUNTUKYLIN_CACHE_ICON_PATH + str(app_name) + ".png"
-    elif(os.path.isfile(UBUNTUKYLIN_CACHE_ICON_PATH + str(app_name) + ".jpg")):
-        return UBUNTUKYLIN_CACHE_ICON_PATH + str(app_name) + ".jpg"
-    elif(os.path.isfile(UBUNTUKYLIN_RES_ICON_PATH + str(app_name) + ".png")):
-        return UBUNTUKYLIN_RES_ICON_PATH + str(app_name) + ".png"
-    elif(os.path.isfile(UBUNTUKYLIN_RES_ICON_PATH + str(app_name) + ".jpg")):
-        return UBUNTUKYLIN_RES_ICON_PATH + str(app_name) + ".jpg"
-    elif(os.path.isfile(DEBFILE_ICON_PATH + str(app_name) + ".png")):
-        return DEBFILE_ICON_PATH + str(app_name) + ".png"
-    else:
-        return UBUNTUKYLIN_RES_ICON_PATH + "default.png"
+    iconPathList=[
+        KYLIN_SYSTEM_ICON_48_PATH,
+        UK_SYSTEM_ICON_48_PATH,
+        UBUNTUKYLIN_CACHE_ICON_PATH,
+        UBUNTUKYLIN_RES_ICON_PATH,
+        DEBFILE_ICON_PATH
+    ]
+    extList=['.png','.jpg']
+    for iconPath in iconPathList:
+        for ext in extList:
+            filePath=os.path.join(iconPath,str(app_name) + ext)
+            if(os.path.isfile(filePath)):
+                return filePath
+    return os.path.join(UBUNTUKYLIN_RES_ICON_PATH,"default.png")
 
 # add by kobe to format long text
 def setLongTextToElideFormat(label, text):
