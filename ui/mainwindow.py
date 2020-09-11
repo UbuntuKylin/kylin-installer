@@ -55,7 +55,7 @@ class Ui_MainWindow(object):
         self.title_icon=QLabel(self.title)
         self.title_icon.setObjectName(_fromUtf8("title_icon"))
         self.title_icon.setGeometry(QtCore.QRect(10, 1, 24, 24))
-        self.title_icon.setStyleSheet(".QLabel{background-color:transparent;;background-image:url('res/logo.png');}")
+        self.title_icon.setStyleSheet(".QLabel{background-color:transparent;;background-image:url('res/logo.svg');}")
 
         self.title_text=QLabel(self.title)
         self.title_text.setObjectName(_fromUtf8("title_text"))

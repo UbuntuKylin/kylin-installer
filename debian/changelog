@@ -1,3 +1,21 @@
+kylin-installer (0.1.0kord) v100; urgency=medium
+
+  * 修复禅道bug-18171,bug-16181,替换软件图标
+
+ -- lijiang (rain) <lijiang@kylinos.cn>  Fri, 11 Sep 2020 09:09:05 +0800
+
+kylin-installer (0.0.9kord) v101; urgency=medium
+
+  * 修复禅道bug-17486,bug-17452
+
+ -- lijiang (rain) <lijiang@kylinos.cn>  Wed, 09 Sep 2020 11:49:46 +0800
+
+kylin-installer (0.0.8kord) v100; urgency=medium
+
+  * 修复禅道bug-16413、bug-16180
+
+ -- lijiang (rain) <lijiang@kylinos.cn>  Fri, 04 Sep 2020 11:25:04 +0800
+
 kylin-installer (0.0.7kord) v100; urgency=medium
 
   * 修改无法安装包含中文字符包的bug

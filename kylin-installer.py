@@ -72,8 +72,11 @@ class Example(QWidget):
     def InitUI(self):
         self.ui=Ui_MainWindow()
         self.ui.setupUi(self)
+        if LAUNCH_MODE == "normal":
+            self.ui.install.setEnabled(False)
+            self.ui.install.setStyleSheet("QPushButton{background-color:#A9A9A9;border:0px;font-size:16px;border-radius:4px;color:#ffffff}")
+            self.ui.icon.setStyleSheet("QLabel{background-image:url('res/kylin-installer-48.svg')}")
         self.ui.centralwidget.paintEvent=self.set_paintEvent
-        self.ui.icon.setStyleSheet(".QWidget{background-color:transparent;background-image:url('res/no-download.png');border:1px solid red;border-radius:0px}")
         self.ui.btnClose.setStyleSheet("QPushButton{background-image:url('res/close-1.png');border:0px;}QPushButton:hover{background-image:url('res/close-2.png');background-color:#c75050;}QPushButton:pressed{background-image:url('res/close-2.png');background-color:#bb3c3c;}")
 
     def mousePressEvent(self, event):
@@ -135,7 +138,7 @@ class Example(QWidget):
             path=QPainterPath()
             path.setFillRule(Qt.WindingFill)
             path.addRoundedRect(10 - i, 10 - i,self.ui.centralwidget.width() - (10 - i) * 2, self.ui.centralwidget.height() - (10 - i) * 2, 6, 6)
-            color.setAlpha(100 - math.sqrt(i) * 50)
+            color.setAlpha(100 - int(math.sqrt(i)) * 50)
             painter.setPen(color)
             painter.drawPath(path)
             i=i+1
@@ -175,14 +178,14 @@ class Example(QWidget):
                 self.ui.pkgname.setToolTip(self.debfile.name)
 
         self.app = self.debfile
-        iconpath = get_icon.get_icon_path(str(self.debfile.name))
-        if iconpath:
-            self.ui.icon.setStyleSheet("QLabel{background-image:url('" + iconpath + "');background-color:transparent;}")
+        if LAUNCH_MODE != "normal":
+            iconpath = get_icon.get_icon_path(str(self.debfile.name))
+            if iconpath:
+                self.ui.icon.setStyleSheet("QLabel{background-image:url('" + iconpath + "');background-color:transparent;}")
         if self.debfile.version:
             text = get_icon.setLongTextToElideFormat(self.ui.Version, "版本号： " + self.debfile.version)
             if str(text).endswith("…") is True:
                 self.ui.Version.setToolTip(self.debfile.version)
-
         else:
             self.ui.Version.setText("版本号：暂无")
         self.ui.install.clicked.connect(self.install_debfile)
