@@ -21,7 +21,7 @@ data_files=[
     ('share/polkit-1/actions/', ['backend/conf/com.kylin.packages.manager.tools.policy']),
     ('share/dbus-1/system-services/', ['backend/conf/com.kylin.packages.manager.tools.service']),
     ('share/applications/',['kylin-installer.desktop']),
-    ('share/pixmaps/',['kylin-installer.svg']),
+    ('share/icons/hicolor/scalable/apps',['kylin-installer.svg']),
     ('share/kylin-installer/data/icons/', glob.glob('data/icons/*.png')),
     ('share/kylin-installer/ui/', glob.glob('ui/*')),
     ('share/kylin-installer/utils/', glob.glob('utils/*')),
