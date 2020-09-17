@@ -49,7 +49,7 @@ class MessageBox(QObject):
         self.alertDelayTimer = QTimer(self)
         self.alertDelayTimer.timeout.connect(self.slot_hide_alert)
         self.alertGOE = QGraphicsOpacityEffect()
-        self.statu = "success"
+        self.status = "success"
 
         self.alert = QPushButton(parent)
         self.alert.setGeometry(185,0, 150, 56)
@@ -70,8 +70,8 @@ class MessageBox(QObject):
     #函数名:警告 
     #Function: alert
     #
-    def alert_msg(self, alertText, statu = "success"):
-        self.statu = statu
+    def alert_msg(self, alertText, status = "success"):
+        self.status = status
         self.alertTimer.stop()
         self.alertDelayTimer.stop()
         self.ay = 410
@@ -92,7 +92,7 @@ class MessageBox(QObject):
         if(self.ay <= 280):
             self.alertTimer.stop()
             # close after * second
-            if self.statu == "success":
+            if self.status == "success":
                 self.alertDelayTimer.start(4000)
             else:
                 self.alertDelayTimer.stop()
@@ -106,4 +106,5 @@ class MessageBox(QObject):
     #
     def slot_hide_alert(self):
         self.alert.hide()
+        self.alertTimer.stop()
         self.alertDelayTimer.stop()
