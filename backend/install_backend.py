@@ -52,6 +52,7 @@ DBUS_SERVICE_PATH = "com.kylin.packages.manager.tools"
 DBUS_INTERFACE_PATH = "com.kylin.packages.manager.tools"
 INSTALLDEPS = "install_deps"
 INSTALLDEBFILE = "install_debfile"
+REMOVE = "remove"
 
 AptActionMsg = {
     "install_deps":_("Install dependencies"),
@@ -142,7 +143,9 @@ class InstallBackend(QObject):
     def install_deps(self, path):
         return self.call_dbus_iface(INSTALLDEPS, path)
 
-
+    #
+    # 函数：安装本地deb包
+    #
     def install_debfile(self, path):
         debcache_dir = os.path.join(os.path.expanduser("~"), ".cache", "kylin-installer", "debfile")
         if (os.path.exists(debcache_dir) == False):
@@ -156,6 +159,12 @@ class InstallBackend(QObject):
         return self.call_dbus_iface(INSTALLDEBFILE, path)
 
     #
+    # 函数：卸载软件包
+    #
+    def remove(self, pkgname):
+        return self.call_dbus_iface(REMOVE, pkgname)
+
+    #
     # 函数：生成随机字符串
     #
     def random_char(self, num):
@@ -164,6 +173,7 @@ class InstallBackend(QObject):
         for i in range(num):
             character += random.choice(charlist)
         return character
+
     #
     # 函数：apt调用的返回信号响应
     #

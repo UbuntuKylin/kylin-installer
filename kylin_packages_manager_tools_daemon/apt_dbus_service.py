@@ -26,18 +26,14 @@
 
 import sys
 import os
-import signal
-import glob
-import fcntl
-import shutil
 import logging
-import tempfile
-import subprocess
-import re
+
+import apt
 import dbus
 import dbus.service
 import dbus.mainloop.glib
 from apt.debfile import DebPackage
+from kylin_packages_manager_tools_daemon.apt_daemon import AppActions, AptProcess
 from gi.repository import GObject
 
 
@@ -46,21 +42,6 @@ log = logging.getLogger('PackagesManager')
 INTERFACE = 'com.kylin.packages.manager.tools'
 PACKAGES_MANAGER_TOOLS = 'com.kylin.packages.manager.tools.action'
 UKPATH = '/'
-
-class AppActions:
-    INSTALLDEPS = "install_deps"
-    INSTALLDEBFILE = "install_debfile"
-    INSTALL = "install"
-    REMOVE = "remove"
-    UPGRADE = "upgrade"
-    CANCEL = "cancel"
-    APPLY = "apply_changes"
-    PURCHASE = "purchase"
-    UPDATE = "update"
-    UPDATE_FIRST = "update_first"
-    ADD_SOURCE = "add_source"
-    REMOVE_SOURCE = "remove_source"
-    GET_SOURCES = "get_sources"
 
 class WorkitemError(Exception):
 
@@ -71,7 +52,7 @@ class WorkitemError(Exception):
 class PackagesManagerDbusService(dbus.service.Object):
 
     def __init__ (self, bus, mainloop):
-
+        self.cache = apt.Cache()
         self.bus = bus
         self.bus_name = dbus.service.BusName(INTERFACE, bus=bus)
 #        print "SoftwarecenterDbusService:",self.bus_name
@@ -107,12 +88,27 @@ class PackagesManagerDbusService(dbus.service.Object):
         return granted
 
     #
+    # 函数：根据软件包获取软件名
+    #
+    def get_pkg_by_name(self, pkgName):
+        #        print pkgName
+        try:
+            pkg = self.cache[pkgName]
+        except KeyError:
+            raise WorkitemError(1, "Package %s is not  available" % pkgName)
+        else:
+            if pkg.candidate is None:
+                raise WorkitemError(1, "Package %s is not  available" % pkgName)
+            else:
+                return pkg
+    #
     # 函数：安装软件包
     #
     @dbus.service.method(INTERFACE, in_signature='s', out_signature='b', sender_keyword='sender')
     def install_debfile(self, path, sender=None):
         print("####install deb file: ", path)
         # path = "".join([chr(character) for character in path]) # add by zhangxin for chinese .deb path 11.19
+        # 开启密码认证机制
         granted = self.auth_with_policykit(sender, PACKAGES_MANAGER_TOOLS)
         if not granted:
             kwarg = {"appname": path,
@@ -135,10 +131,11 @@ class PackagesManagerDbusService(dbus.service.Object):
         except Exception as e:
             raise WorkitemError(5, e)
         #self.cache.open()
+        #获取软件包名
         pkgName = debfile._sections["Package"]
         debfile.check() #do debfile.check for the next to do debfile.missing_deps
         if 0 == len(debfile.missing_deps):
-            # try:
+            # 安装软件包
             res = debfile.install()
             if res:
                 kwarg = {"apt_appname": pkgName,
@@ -163,18 +160,26 @@ class PackagesManagerDbusService(dbus.service.Object):
     @dbus.service.method(INTERFACE, in_signature='s', out_signature='b', sender_keyword='sender')
     def remove(self, pkgName, sender=None):
         print("####remove: ", pkgName)
-
+        # 开启密码认证
         granted = self.auth_with_policykit(sender, PACKAGES_MANAGER_TOOLS)
-
-        # file=open("/home/prisoner/list.txt","w+")
-        # file.write(str(granted))
-        # file.close()
         if not granted:
             kwarg = {"appname": pkgName,
                      "action": AppActions.REMOVE,
                      }
             self.software_auth_signal("auth_cancel", kwarg)
             return False
+        self.cache.open()
+        pkg = self.get_pkg_by_name(pkgName)
+        if pkg.is_installed is False:
+            raise WorkitemError(11, "Package %s isn't installed" % pkgName)
+        pkg.mark_delete()
+
+        try:
+            self.cache.commit(None, AptProcess(self.dbus_service, pkgName, AppActions.REMOVE))
+        except apt.cache.LockFailedException:
+            raise WorkitemError(3, "package manager is running.")
+        except Exception as e:
+            raise WorkitemError(12, e)
         print("####remove return")
         return True
 
