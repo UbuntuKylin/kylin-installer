@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=kylin-installer
-Name[zh_CN]=安装管理器
-Comment[zh_CN]=麒麟软件管理工具
+Name[zh_CN]=麒麟应用安装器
+Comment[zh_CN]=麒麟软件包管理工具
 Comment=Kylin packages management tools
 Exec=/usr/bin/kylin-installer %u
 Icon=kylin-installer
@@ -11,3 +11,4 @@ Terminal=false
 Type=Application
 Categories=PackageManager;GTK;System;Settings;Viewer;
 Keywords=Sources;PPA;Install;Uninstall;Remove;Purchase;Catalogue;Store;Apps;
+MimeType=application/vnd.debian.binary-package;
