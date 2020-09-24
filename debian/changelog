@@ -1,3 +1,37 @@
+kylin-installer (0.1.2kord) v100; urgency=medium
+
+  * 新增dbus后台卸载功能，完成卸载ui界面。
+  * 新增软件安装后“立即体验”的功能
+
+ -- lijiang (rain) <lijiang@kylinos.cn>  Thu, 17 Sep 2020 16:52:15 +0800
+
+kylin-installer (0.1.1kord) v100; urgency=medium
+
+  * 修改ui界面，调整界面大小；
+  * 新增主题切换功能，可软件自己切换也可以跟随主题修改；
+  * 修改按钮样式跟随系统，增加高亮反白处理；
+  * 增加ukui主题判断，v10系统增加额外处理。
+
+ -- lijiang (rain) <lijiang@kylinos.cn>  Thu, 17 Sep 2020 16:52:15 +0800
+
+kylin-installer (0.1.0kord) v100; urgency=medium
+
+  * 修复禅道bug-18171,bug-16181,替换软件图标
+
+ -- lijiang (rain) <lijiang@kylinos.cn>  Fri, 11 Sep 2020 09:09:05 +0800
+
+kylin-installer (0.0.9kord) v101; urgency=medium
+
+  * 修复禅道bug-17486,bug-17452
+
+ -- lijiang (rain) <lijiang@kylinos.cn>  Wed, 09 Sep 2020 11:49:46 +0800
+
+kylin-installer (0.0.8kord) v100; urgency=medium
+
+  * 修复右键选择打开方式图标不显示的bug
+
+ -- lijiang (rain) <lijiang@kylinos.cn>  Tue, 01 Sep 2020 16:56:28 +0800
+
 kylin-installer (0.0.7kord) v100; urgency=medium
 
   * 修改无法安装包含中文字符包的bug
