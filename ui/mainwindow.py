@@ -167,7 +167,6 @@ class Ui_MainWindow(QWidget):
         self.install.setGeometry(QtCore.QRect(220, 234, 150, 45))
         self.install.setStyleSheet("QPushButton{background-color:#2d8ae1;border:0px;font-size:16px;border-radius:4px;color:#ffffff}"
                                    "QPushButton:hover{background-color:#3580c4;border:0px;border-radius:4px;font-size:16px;color:#ffffff}")
-        self.install.setText("一键安装")
 
         self.loding = QMovie("./res/loading1.gif")
         self.progressBar = QLabel(self.centralWidget)
@@ -187,7 +186,6 @@ class Ui_MainWindow(QWidget):
         # self.status_ft.setBold(True)
         self.status.setFont(self.status_ft)
         # self.status.setStyleSheet(".QLabel{background-color:transparent;border:0px;font-size:12px;}")
-        self.status.setText("正在安装...")
         self.status.setAlignment(Qt.AlignLeft | Qt.AlignBottom)
         self.status.hide()
 
