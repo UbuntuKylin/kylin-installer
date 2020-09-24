@@ -52,7 +52,7 @@ class WorkitemError(Exception):
 class PackagesManagerDbusService(dbus.service.Object):
 
     def __init__ (self, bus, mainloop):
-        self.cache = apt.Cache()
+        self.cache = apt.cache.Cache()
         self.bus = bus
         self.bus_name = dbus.service.BusName(INTERFACE, bus=bus)
 #        print "SoftwarecenterDbusService:",self.bus_name
@@ -107,7 +107,6 @@ class PackagesManagerDbusService(dbus.service.Object):
     @dbus.service.method(INTERFACE, in_signature='s', out_signature='b', sender_keyword='sender')
     def install_debfile(self, path, sender=None):
         print("####install deb file: ", path)
-        # path = "".join([chr(character) for character in path]) # add by zhangxin for chinese .deb path 11.19
         # 开启密码认证机制
         granted = self.auth_with_policykit(sender, PACKAGES_MANAGER_TOOLS)
         if not granted:
@@ -134,24 +133,39 @@ class PackagesManagerDbusService(dbus.service.Object):
         #获取软件包名
         pkgName = debfile._sections["Package"]
         debfile.check() #do debfile.check for the next to do debfile.missing_deps
-        if 0 == len(debfile.missing_deps):
-            # 安装软件包
-            res = debfile.install()
-            if res:
-                kwarg = {"apt_appname": pkgName,
-                         "apt_percent": str(-200),
-                         "action": str(AppActions.INSTALLDEBFILE),
-                         }
-                self.software_apt_signal("apt_finish", kwarg)
-                raise WorkitemError(6, "package manager failed")
-            else:
-                kwarg = {"apt_appname":pkgName,
-                         "apt_percent":str(200),
-                         "action":str(AppActions.INSTALLDEBFILE),
-                         }
-                self.software_apt_signal("apt_finish", kwarg)
+        print("len:%s" % len(debfile.missing_deps))
+        # 安装源中存在的依赖包
+        if len(debfile.missing_deps) != 0:
+            for deb in debfile.missing_deps:
+                pkg = self.get_pkg_by_name(deb)
+                print("lj.pkg:%s" %pkg)
+                pkg.mark_install()
+                try:
+                    self.cache.commit(None, None)
+                except apt.cache.LockFailedException:
+                    raise WorkitemError(3, "package manager is running.")
+        #安装软件包
+        res = debfile.install()
+        if res:
+            kwarg = {"apt_appname": pkgName,
+                    "apt_percent": str(-200),
+                    "action": str(AppActions.INSTALLDEBFILE),
+                    }
+            self.software_apt_signal("apt_finish", kwarg)
+            raise WorkitemError(6, "package manager failed")
         else:
-            raise WorkitemError(16, "dependence not be satisfied")
+            kwarg = {"apt_appname": pkgName,
+                    "apt_percent": str(200),
+                    "action": str(AppActions.INSTALLDEBFILE),
+                    }
+            self.software_apt_signal("apt_finish", kwarg)
+        # else:
+        #     kwarg = {"apt_appname": pkgName,
+        #              "apt_percent": str(-200),
+        #              "action": str(AppActions.INSTALLDEBFILE),
+        #              }
+        #     self.software_apt_signal("apt_error", kwarg)
+        #     raise WorkitemError(16, "dependence not be satisfied")
         return True
 
     #
@@ -168,18 +182,37 @@ class PackagesManagerDbusService(dbus.service.Object):
                      }
             self.software_auth_signal("auth_cancel", kwarg)
             return False
+        else:
+            kwarg = {"appname": pkgName,
+                     "action": AppActions.REMOVE,
+                     }
+            self.software_auth_signal("auth_ensure", kwarg)
         self.cache.open()
         pkg = self.get_pkg_by_name(pkgName)
         if pkg.is_installed is False:
             raise WorkitemError(11, "Package %s isn't installed" % pkgName)
         pkg.mark_delete()
-
         try:
-            self.cache.commit(None, AptProcess(self.dbus_service, pkgName, AppActions.REMOVE))
+            self.cache.commit(None, None)
         except apt.cache.LockFailedException:
+            kwarg = {"apt_appname": pkgName,
+                     "apt_percent": str(-200),
+                     "action": str(AppActions.REMOVE),
+                     }
+            self.software_apt_signal("apt_error", kwarg)
             raise WorkitemError(3, "package manager is running.")
         except Exception as e:
+            kwarg = {"apt_appname": pkgName,
+                     "apt_percent": str(-200),
+                     "action": str(AppActions.REMOVE),
+                     }
+            self.software_apt_signal("apt_error", kwarg)
             raise WorkitemError(12, e)
+        kwarg = {"apt_appname": pkgName,
+                 "apt_percent": str(200),
+                 "action": str(AppActions.REMOVE),
+                 }
+        self.software_apt_signal("apt_finish", kwarg)
         print("####remove return")
         return True
 
