@@ -35,9 +35,6 @@ import logging
 from PyQt5.QtCore import *
 from PyQt5 import QtDBus
 
-
-import multiprocessing
-
 from dbus.mainloop.glib import DBusGMainLoop
 mainloop = DBusGMainLoop(set_as_default=True)
 #from dbus.mainloop.qt import DBusQtMainLoop
