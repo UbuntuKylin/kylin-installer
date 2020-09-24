@@ -4,6 +4,7 @@
 ### BEGIN LICENSE
 import logging
 import signal
+import subprocess
 
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
@@ -11,6 +12,7 @@ from PyQt5.QtWidgets import *
 from PyQt5 import QtGui
 import sys
 import os
+import apt
 from PyQt5.QtWidgets import QWidget, QApplication
 from ui.mainwindow import Ui_MainWindow
 from backend.install_backend import InstallBackend
@@ -39,7 +41,9 @@ class  initThread(QThread):
     def run(self):
         # init dbus backend
         self.backend.init_dbus_ifaces()
-
+#
+# 类：安装或卸载线程
+#
 class workThread(QThread):
     def __init__(self, backend, model):
         super(workThread, self).__init__()
@@ -50,10 +54,42 @@ class workThread(QThread):
             if self.model == 'install':
                 self.backend.install_debfile(LOCAL_DEB_FILE)
             elif self.model == 'remove':
+                print("use remove")
                 self.backend.remove(REMOVE_SOFT)
         except Exception as e:
             print("install error: %s" % str(e))
             LOG.error(str(e))
+
+#
+# 类：解析是否存在desktop文件的线程
+#
+class parseThread(QThread, QObject):
+    parse_over = pyqtSignal(str)
+
+    def __init__(self, pkgname):
+        super(parseThread, self).__init__()
+        self.pkgname = pkgname
+
+    def run(self):
+        exec_word = None
+        self.desktop_path = "/usr/share/applications/" + self.pkgname + ".desktop"
+        print("desktop_path:%s" % self.desktop_path)
+        #判断是否存在同名的desktop文件
+        if os.path.exists(self.desktop_path):
+            setting = QSettings(self.desktop_path, QSettings.IniFormat)
+            setting.beginGroup("Desktop Entry")
+            exec_word = str(setting.value("Exec")).split(" ")[0]
+        #不存在同名的desktop文件则进行deb包解析
+        else:
+            self.debfile = DebPackage(LOCAL_DEB_FILE)
+            for desktop in self.debfile.filelist:
+                if desktop.endswith(".desktop"):
+                    print(desktop)
+                    self.desktop = desktop
+                    setting = QSettings("/" + self.desktop, QSettings.IniFormat)
+                    setting.beginGroup("Desktop Entry")
+                    exec_word = str(setting.value("Exec")).split(" ")[0]
+        self.parse_over.emit(exec_word)
 
 class Example(QWidget):
     MAIN_WIDTH_NORMAL=500
@@ -72,24 +108,29 @@ class Example(QWidget):
         self.ukui_judge()
         self.work = workThread(self.backend, model)
         #self.messageBox = MessageBox(self)
-        self.ui.closeButton.clicked.connect(self.slot_close)
-        self.ui.closeButton.installEventFilter(self)
         self.backend.dbus_apt_process.connect(self.slot_status_change)
-        self.show_debfile(LOCAL_DEB_FILE)
         self.border_width = 8
         # self.setAttribute()
 
     def InitUI(self):
         self.ui=Ui_MainWindow()
         self.ui.setupUi(self)
+        if LAUNCH_MODE == 'manual':
+            self.show_softinfo(path=LOCAL_DEB_FILE)
+        elif LAUNCH_MODE == 'remove':
+            self.show_softinfo(softname=REMOVE_SOFT)
+        else:
+            self.show_softinfo()
+        self.ui.minButton.clicked.connect(self.minisize_window)
+        self.ui.menu.white_model_action.triggered.connect(self.set_white_model)
+        self.ui.menu.dark_model_action.triggered.connect(self.set_dark_model)
+        self.ui.closeButton.clicked.connect(self.slot_close)
+        self.ui.closeButton.installEventFilter(self)
         if LAUNCH_MODE == "normal":
             self.ui.install.setEnabled(False)
             self.ui.install.setStyleSheet("QPushButton{background-color:#A9A9A9;border:0px;font-size:16px;border-radius:4px;color:#ffffff}")
             self.ui.icon.setStyleSheet("QLabel{background-image:url('res/kylin-installer-64.svg')}")
         # self.ui.centralwidget.paintEvent=self.set_paintEvent
-        self.ui.minButton.clicked.connect(self.minisize_window)
-        self.ui.menu.white_model_action.triggered.connect(self.set_white_model)
-        self.ui.menu.dark_model_action.triggered.connect(self.set_dark_model)
         # self.ui.closeButton.setStyleSheet("QPushButton:hover{background-color:red}QPushButton:pressed{background-color:red;}")
 
     #
@@ -147,36 +188,6 @@ class Example(QWidget):
                 if(self.dragPosition != -1):
                     self.move(event.globalPos() - self.dragPosition)
                     event.accept()
-
-    #
-    #函数名：重绘窗口阴影
-    #Function: Redraw window shadow
-    #
-    # def paintEvent(self, event):
-    #     painter=QPainter(self.ui.centralwidget)
-    #     m_defaultBackgroundColor = QColor(qRgb(192,192,192))
-    #     m_defaultBackgroundColor.setAlpha(50)
-    #     path=QPainterPath()
-    #     path.setFillRule(Qt.WindingFill)
-    #     path.addRoundedRect(10, 10, self.ui.centralwidget.width() - 20, self.ui.centralwidget.height() - 20, 4, 4)
-    #
-    #     painter.setRenderHint(QPainter.Antialiasing, True)
-    #     painter.fillPath(path, QBrush(QColor(m_defaultBackgroundColor.red(),
-    #                                          m_defaultBackgroundColor.green(),
-    #                                          m_defaultBackgroundColor.blue())))
-    #
-    #     color=QColor(0, 0, 0, 20)
-    #     i=0
-    #     while i<4:
-    #         path=QPainterPath()
-    #         path.setFillRule(Qt.WindingFill)
-    #         path.addRoundedRect(10 - i, 10 - i,self.ui.centralwidget.width() - (10 - i) * 2, self.ui.centralwidget.height() - (10 - i) * 2, 6, 6)
-    #         color.setAlpha(100 - int(math.sqrt(i)) * 50)
-    #         painter.setPen(color)
-    #         painter.drawPath(path)
-    #         i=i+1
-    #
-    #     painter.setRenderHint(QPainter.Antialiasing)
     
     def paintEvent(self, event):
         # 阴影
@@ -293,39 +304,74 @@ class Example(QWidget):
             print("kkk",e)
 
     #
-    # 函数：安装软件
+    # 函數：卸载软件
     #
-    def install_debfile(self):
-        #self.start_dpkg()
+    def remove(self):
         self.work.start()
 
     #
-    # 函数：显示软件包状态
+    # 函数：安装软件
     #
-    def show_debfile(self,path):
-        self.debfile = DebFile(path)
-        if path == '':
-            # self.ui.pkgname.setText()
-            text = get_icon.setLongTextToElideFormat(self.ui.pkgname, _("暂无可安装文件"))
-            if str(text).endswith("…") is True:
-                self.ui.pkgname.setToolTip("暂无可安装文件")
-        else:
-            text = get_icon.setLongTextToElideFormat(self.ui.pkgname, _(str(self.debfile.name))) #判断字符是否过长，自动生成省略号
-            if str(text).endswith("…") is True:
-                self.ui.pkgname.setToolTip(self.debfile.name)
-        self.app = self.debfile
-        if LAUNCH_MODE != "normal":
-            iconpath = get_icon.get_icon_path(str(self.debfile.name))
-            if iconpath:
-                self.ui.icon.setStyleSheet("QLabel{background-image:url('" + iconpath + "');background-color:transparent;background-position:center;background-repeat:none}")
-        if self.debfile.version:
+    def install_debfile(self):
+        #self.start_install()
+        self.work.start()
+
+    #
+    # 函数：显示软件包信息
+    #
+    def show_softinfo(self,path=None,softname=None):
+        if path != None:
+            self.debfile = DebFile(path)
+            self.pkgname = self.debfile.name
             text = get_icon.setLongTextToElideFormat(self.ui.version, "版本号： " + self.debfile.version)
             if str(text).endswith("…") is True:
                 self.ui.version.setToolTip(self.debfile.version)
-
-        else:
+            self.parse = parseThread(self.pkgname)
+            self.parse.parse_over.connect(self.parse_desktop)
+            self.exec_word = None
+        elif softname != None:
+            self.cache = apt.Cache()
+            pkg = self.cache[softname]
+            self.pkg_name = pkg.shortname
+            self.pkg_version = pkg.versions.keys()[0]
+        if LAUNCH_MODE == 'normal':
+            # self.ui.pkgname.setText()
+            self.ui.install.setText("一键安装")
+            text = get_icon.setLongTextToElideFormat(self.ui.pkgname, _("暂无可安装文件"))
+            if str(text).endswith("…") is True:
+                self.ui.pkgname.setToolTip("暂无可安装文件")
             self.ui.version.setText("版本号：暂无")
-        self.ui.install.clicked.connect(self.install_debfile)
+        elif LAUNCH_MODE == 'manual':
+            self.ui.install.setText("一键安装")
+            self.ui.install.clicked.connect(self.install_debfile)
+            iconpath = get_icon.get_icon_path(str(self.debfile.name))
+            text = get_icon.setLongTextToElideFormat(self.ui.pkgname, _(str(self.debfile.name)))  # 判断字符是否过长，自动生成省略号
+            if str(text).endswith("…") is True:
+                self.ui.pkgname.setToolTip(self.debfile.name)
+            if iconpath:
+                self.ui.icon.setStyleSheet("QLabel{background-image:url('" + iconpath + "');background-color:transparent;background-position:center;background-repeat:none}")
+        elif LAUNCH_MODE == 'remove':
+            if pkg.is_installed:
+                self.ui.install.setText("一键卸载")
+                self.ui.install.clicked.connect(self.remove)
+                self.ui.version.setText("版本号：" + self.pkg_version)
+                iconpath = get_icon.get_icon_path(str(self.pkg_name))
+                text = get_icon.setLongTextToElideFormat(self.ui.pkgname, _(str(self.pkg_name)))  # 判断字符是否过长，自动生成省略号
+                if str(text).endswith("…") is True:
+                    self.ui.pkgname.setToolTip(self.pkg_name)
+                if iconpath:
+                    self.ui.icon.setStyleSheet("QLabel{background-image:url('" + iconpath + "');background-color:transparent;background-position:center;background-repeat:none}")
+            else: #软件未安装时，提示信息
+                self.ui.install.setText("一键卸载")
+                self.ui.install.setStyleSheet("QPushButton{background-color:#A9A9A9;border:0px;font-size:16px;border-radius:4px;color:#ffffff}")
+                self.ui.install.setEnabled(False)
+                text = get_icon.setLongTextToElideFormat(self.ui.pkgname, _("该软件未安装"))
+                if str(text).endswith("…") is True:
+                    self.ui.pkgname.setToolTip("该软件未安装")
+                self.ui.version.setText("版本号：暂无")
+                iconpath = get_icon.get_icon_path(str(self.pkg_version))
+                if iconpath:
+                    self.ui.icon.setStyleSheet("QLabel{background-image:url('" + iconpath + "');background-color:transparent;background-position:center;background-repeat:none}")
 
     #
     # 函数：接收后台信号修改包状态
@@ -334,29 +380,42 @@ class Example(QWidget):
         print(("####", name, " ", processtype, " ", action, " ", msg))
         if action == AppActions.INSTALLDEBFILE:
             if processtype == "apt" and percent < 0:
-                self.stop_dpkg()
-                self.ui.status.hide()
-                self.ui.loding.stop()
-                self.ui.progressBar.hide()
-                #self.messageBox.alert_msg("安装失败")
-                self.ui.install.show()
-                app.percent = 0
+                self.stop_install(percent)
             elif processtype == "apt" and percent == 200:
-                self.stop_dpkg()
-                #self.messageBox.alert_msg("安装完成")
-                self.ui.install.setText("安裝完成")
-                #self.ui.install.setStyleSheet("background-color:#999999")
-                self.ui.install.setEnabled(False)
-                app.percent = percent
+                print("install over")
+                self.stop_install(percent)
             elif processtype == "cancel" and percent == 0:
-                self.stop_dpkg()
+                # self.stop_install()
+                pass
             elif processtype == "ensure":
-                self.start_dpkg()
+                self.start_install()
+        elif action == AppActions.REMOVE:
+            if processtype == "apt" and percent < 0:
+                self.stop_remove(percent)
+            if processtype == "apt" and percent == 200:
+                self.stop_remove(percent)
+            elif processtype == "cancel" and percent == 0:
+                # self.stop_remove()
+                pass
+            elif processtype == "ensure":
+                self.start_remove()
 
     #
-    # 函数：安装完成后，修改ui界面
+    # 函数：安装完成后解析desktop文件
     #
-    def stop_dpkg(self):
+    def parse_desktop(self, exec_word):
+        self.exec_word = exec_word
+        if self.exec_word != "":
+            self.ui.status_text.setText("安装完成")
+            self.ui.install.setText("立即体验")
+            self.ui.install.setEnabled(True)
+            self.ui.install.clicked.connect(self.experience)
+            self.ui.install.clicked.disconnect(self.install_debfile)
+        else:
+            self.ui.status_text.setText("安装完成")
+            self.ui.install.setText("安装完成")
+            self.ui.install.setEnabled(False)
+        self.ui.status_icon.setStyleSheet("QLabel{background-image:url('res/success.png')}")
         self.ui.loding.stop()
         self.ui.status.hide()
         self.ui.pkgname.hide()
@@ -365,23 +424,87 @@ class Example(QWidget):
         self.ui.install.move(220,229)
         self.ui.install.show()
         self.ui.icon.hide()
-        self.ui.status_text.setText("安装完成！")
         self.ui.status_text.setFont(self.ui.status_text_ft)
         self.ui.status_text.show()
-        self.ui.status_icon.setStyleSheet("QLabel{background-image:url('res/success.png')}")
         self.ui.status_icon.show()
+
+    #
+    # 函数：立即体验安装完成后的软件
+    #
+    def experience(self):
+        subprocess.Popen(self.exec_word)
 
     #
     # 函数：开始安装后，修改ui界面
     #
-    def start_dpkg(self):
+    def start_install(self):
+        self.ui.status.setText("正在安装...")
         self.ui.status.show()
         self.ui.install.hide()
         self.ui.loding.start()
         self.ui.progressBar.show()
 
     #
-    # 函数：开始卸载软件包
+    # 函数：安装完成后，修改ui界面
+    #
+    def stop_install(self, percent):
+        if percent > 0:
+            self.parse.start()
+            return
+        else:
+            self.ui.status_text.setText("安装失败")
+            self.ui.install.setText("安装失败")
+            self.ui.status_icon.setStyleSheet("QLabel{background-image:url('res/error.png')}")
+            self.ui.install.setEnabled(False)
+        self.ui.loding.stop()
+        self.ui.status.hide()
+        self.ui.pkgname.hide()
+        self.ui.version.hide()
+        self.ui.progressBar.hide()
+        self.ui.install.move(220,229)
+        self.ui.install.show()
+        self.ui.icon.hide()
+        self.ui.status_text.setFont(self.ui.status_text_ft)
+        self.ui.status_text.show()
+        self.ui.status_icon.show()
+
+    #
+    # 函数：开始卸载后，修改UI界面
+    #
+    def start_remove(self):
+        self.ui.status.setText("正在卸载...")
+        self.ui.status.show()
+        self.ui.install.hide()
+        self.ui.loding.start()
+        self.ui.progressBar.show()
+
+    #
+    # 函数：卸载完成后，修改UI界面
+    #
+    def stop_remove(self, percent):
+        if percent > 0:
+            # self.messageBox.alert_msg("安装完成")
+            self.ui.install.setText("卸载完成")
+            self.ui.status_text.setText("卸载完成！")
+            # self.ui.install.setStyleSheet("background-color:#999999")
+            self.ui.install.setEnabled(False)
+            self.ui.status_icon.setStyleSheet("QLabel{background-image:url('res/success.png')}")
+        else:
+            self.ui.install.setText("卸载失败")
+            self.ui.status_text.setText("卸载失败！")
+            self.ui.install.setEnabled(False)
+            self.ui.status_icon.setStyleSheet("QLabel{background-image:url('res/error.png')}")
+        self.ui.loding.stop()
+        self.ui.status.hide()
+        self.ui.pkgname.hide()
+        self.ui.version.hide()
+        self.ui.progressBar.hide()
+        self.ui.install.move(220, 229)
+        self.ui.install.show()
+        self.ui.icon.hide()
+        self.ui.status_text.setFont(self.ui.status_text_ft)
+        self.ui.status_text.show()
+        self.ui.status_icon.show()
 
     #
     # 函数：过滤事件，设置关闭按钮状态
@@ -485,10 +608,13 @@ if __name__ == "__main__":
             else:
                 sys.exit(0)
     if LAUNCH_MODE == 'manual':
+        print("manul")
         ex = Example('install')
     elif LAUNCH_MODE == 'remove':
+        print("remove")
         ex = Example('remove')
     else:
+        print("normal")
         ex = Example('normal')
     ex.show()
     signal.signal(signal.SIGINT, lambda : close_filelock())
