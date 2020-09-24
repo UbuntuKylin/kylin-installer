@@ -21,6 +21,7 @@ Depends: python3,
          ubuntukylin-keyring,
          ${misc:Depends},
          ${python3:Depends}
+Conflicts: install-debfile
 Recommends: language-pack-zh-hans
 Breaks: ubuntu-kylin-software-center-common
 Replaces: ubuntu-kylin-software-center-common
