@@ -1,3 +1,10 @@
+kylin-installer (0.1.3kord) v100; urgency=medium
+
+  * 增加软件国际化，支持中英文。
+  * 解决任务栏中无图标的bug
+
+ -- lijiang (rain) <lijiang@kylinos.cn>  Fri, 25 Sep 2020 17:33:31 +0800
+
 kylin-installer (0.1.2kord) v100; urgency=medium
 
   * 新增dbus后台卸载功能，完成卸载ui界面。
