@@ -1,0 +1,116 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-09-25 17:29+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: kylin-installer.py:328 kylin-installer.py:359
+msgid "version："
+msgstr "版本号："
+
+#: kylin-installer.py:341 kylin-installer.py:347
+msgid "installation"
+msgstr "一键安装"
+
+#: kylin-installer.py:342 kylin-installer.py:344
+msgid "select an installation file"
+msgstr "请选择一个安装文件"
+
+#: kylin-installer.py:345 kylin-installer.py:373
+msgid "version：no"
+msgstr "版本号：暂无"
+
+#: kylin-installer.py:370
+msgid "software not installed"
+msgstr "软件未安装"
+
+#: kylin-installer.py:411 kylin-installer.py:417
+msgid "installation is complete！"
+msgstr "安装完成！"
+
+#: kylin-installer.py:412
+msgid "experience"
+msgstr "立即体验"
+
+#: kylin-installer.py:418
+msgid "installed"
+msgstr "已安装"
+
+#: kylin-installer.py:443
+msgid "installing..."
+msgstr "安装中..."
+
+#: kylin-installer.py:457
+msgid "Installation failed"
+msgstr "安装失败！"
+
+#: kylin-installer.py:458 kylin-installer.py:495
+msgid "failed"
+msgstr "已失败"
+
+#: kylin-installer.py:477
+msgid "uninstalling..."
+msgstr "卸载中..."
+
+#: kylin-installer.py:490
+msgid "uninstall complete！"
+msgstr "卸载完成！"
+
+#: kylin-installer.py:496
+msgid "uninstall failed！"
+msgstr "卸载失败！"
+
+#: kylin-installer.py:614
+msgid ""
+"Failed to open the file. The file format is not supported or the file is "
+"abnormal"
+msgstr "打开文件失败，格式不支持"
+
+#: ui/mainwindow.py:74
+msgid "kylin-application-installer"
+msgstr "麒麟应用安装器"
+
+#: ui/mainwindow.py:223
+msgid "dark model"
+msgstr "深色模式"
+
+#: ui/mainwindow.py:226
+msgid "white model"
+msgstr "浅色模式"
+
+#: ui/config.py:41
+msgid "Tips"
+msgstr "提示"
+
+#: ui/config.py:43
+msgid "determine"
+msgstr "确认"
+
+#: ui/config.py:44
+msgid "Quit"
+msgstr "退出"
+
+#: kylin-installer.py:367
+msgid "uninstalled"
+msgstr "未安装"
+
+#: kylin-installer.py:357
+msgid "uninstallation"
+msgstr "一键卸载"
+
+#: kylin-installer.py:489
+msgid "removed"
+msgstr "已卸载"
