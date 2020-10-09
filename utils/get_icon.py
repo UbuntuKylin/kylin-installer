@@ -21,7 +21,7 @@
 #
 # You should have received a copy of the GNU General Public License along
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+import gettext
 import os
 
 from PyQt5.QtGui import *
@@ -34,6 +34,10 @@ UBUNTUKYLIN_RES_ICON_PATH = UBUNTUKYLIN_DATA_PATH + "icons/"
 KYLIN_SYSTEM_ICON_48_PATH = "/usr/share/icons/kylin-icon-theme/48x48/apps/"
 UK_SYSTEM_ICON_48_PATH = "/usr/share/icons/ukui-icon-theme-default/48x48/apps/"
 DEBFILE_ICON_PATH="/usr/share/ubuntu-kylin-software-center/data/icons/"
+
+gettext.bindtextdomain("kylin-installer", "/usr/share/locale")
+gettext.textdomain("kylin-installer")
+_ = gettext.gettext
 
 def get_icon_path(app_name):
     if(os.path.isfile(KYLIN_SYSTEM_ICON_48_PATH + str(app_name) + ".png")):
@@ -59,6 +63,6 @@ def setLongTextToElideFormat(label, text):
         text = text.rstrip()
     metrics = QFontMetrics(label.font())
     elidedText = metrics.elidedText(text, Qt.ElideRight, label.width())
-    print("wdith %d" % int(label.width()))
-    label.setText(elidedText)
+    # print("wdith %d" % int(label.width()))
+    label.setText(_(elidedText))
     return elidedText

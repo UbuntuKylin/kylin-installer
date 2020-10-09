@@ -27,7 +27,8 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
 import gettext
-gettext.textdomain("ubuntu-kylin-software-center")
+gettext.bindtextdomain("kylin-installer", "/usr/share/locale")
+gettext.textdomain("kylin-installer")
 _ = gettext.gettext
 
 
@@ -39,8 +40,8 @@ class File_window(QMessageBox):
         # self.setWindowTitle(_("提示"))
         self.setWindowTitle(_("Tips"))
         # self.button_update = self.addButton(self.tr(_("确定")), QMessageBox.ActionRole)
-        self.button_update = self.addButton(self.tr(_("determine")), QMessageBox.ActionRole)
-        self.button_exit = self.addButton(self.tr(_("Quit")), QMessageBox.ActionRole)
+        self.button_update = self.addButton(_("determine"), QMessageBox.ActionRole)
+        self.button_exit = self.addButton(_("Quit"), QMessageBox.ActionRole)
         self.button_exit.hide()
         self.setEscapeButton(self.button_exit)
 
