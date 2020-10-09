@@ -26,7 +26,11 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import os
+import gettext
 UBUNTUKYLIN_RES_PATH = (os.path.abspath(os.path.curdir) + "/res/")
+gettext.bindtextdomain("kylin-installer",  "/usr/share/locale")
+gettext.textdomain("kylin-installer")
+_ = gettext.gettext
 
 class MessageBox(QObject):
     # alert
@@ -77,7 +81,7 @@ class MessageBox(QObject):
         self.ay = 410
         self.ao = 0.0
         self.alertGOE.setOpacity(self.ao)
-        self.alert.setText(alertText)
+        self.alert.setText(_(alertText))
         self.alert.raise_()
         self.alert.show()
         self.alertTimer.start(10)

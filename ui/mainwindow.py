@@ -27,9 +27,10 @@ except AttributeError:
         return QApplication.translate(context, text, disambig)
 
 
-# import gettext
-# gettext.textdomain("ubuntu-kylin-software-center")
-# _ = gettext.gettext
+import gettext
+gettext.bindtextdomain("kylin-installer",  "/usr/share/locale")
+gettext.textdomain("kylin-installer")
+_ = gettext.gettext
 
 class Ui_MainWindow(QWidget):
     def setupUi(self, MainWindow):
@@ -70,7 +71,7 @@ class Ui_MainWindow(QWidget):
         self.title_text=QLabel(self.title)
         self.title_text.setObjectName(_fromUtf8("title_text"))
         self.title_text.setGeometry(QtCore.QRect(45,10,200,24))
-        self.title_text.setText("麒麟应用安装器")
+        self.title_text.setText(_("kylin-application-installer"))
         self.title_text.setContentsMargins(0,0,0,0)
         self.title_text.setAlignment(Qt.AlignLeft | Qt.AlignTop)
         # self.title_text.setStyleSheet("QLabel{background-color:red}")
@@ -105,7 +106,7 @@ class Ui_MainWindow(QWidget):
 
         #设置软件版本信息
         self.version=QLabel(self.tips)
-        self.version.setObjectName(_fromUtf8("Version"))
+        self.version.setObjectName(_fromUtf8("version"))
         self.version.setGeometry(QtCore.QRect(0, 46, 200, 12))
         self.version.setContentsMargins(0,0,0,0)
         # self.version.setAlignment(Qt.AlignLeft | Qt.AlignBottom)
@@ -219,10 +220,10 @@ class Menu(QMenu):
         super(Menu, self).__init__(parent)
         self.group = QActionGroup(self)
         self.group.setExclusive(True)
-        self.dark_model_action = self.addAction(str('深色模式'))
+        self.dark_model_action = self.addAction(_('dark model'))
         self.dark_model_action.setCheckable(True)
         self.group.addAction(self.dark_model_action)
-        self.white_model_action = self.addAction(str('浅色模式'))
+        self.white_model_action = self.addAction(_('white model'))
         self.white_model_action.setCheckable(True)
         self.group.addAction(self.white_model_action)
         # self.help_action = self.addAction(str('帮助'))
