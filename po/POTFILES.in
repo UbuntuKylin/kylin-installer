@@ -1,0 +1,5 @@
+[encoding: UTF-8]
+kylin_packages_manager_tools_daemon/apt_daemon.py
+kylin_packages_manager_tools_daemon/apt_dbus_service.py
+kylin_packages_manager_tools_daemon/__init__.py
+kylin_packages_manager_tools_daemon/start_systemdbus.py

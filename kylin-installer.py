@@ -25,6 +25,8 @@ from ui.messagebox import MessageBox
 from ui.enums import AppActions
 import fcntl
 import gettext
+gettext.bindtextdomain("kylin-installer",  "/usr/share/locale")
+gettext.textdomain("kylin-installer")
 _ = gettext.gettext
 _homepath = os.path.expanduser("~")
 LOG = logging.getLogger("install")
@@ -54,7 +56,7 @@ class workThread(QThread):
             if self.model == 'install':
                 self.backend.install_debfile(LOCAL_DEB_FILE)
             elif self.model == 'remove':
-                print("use remove")
+                # print("use remove")
                 self.backend.remove(REMOVE_SOFT)
         except Exception as e:
             print("install error: %s" % str(e))
@@ -299,6 +301,10 @@ class Example(QWidget):
         try:
             close_filelock()
             self.backend.exit()
+            try:
+                fcntl.flock(pidfile, fcntl.LOCK_UN)
+            except:
+                print("fcntl-error:close pidfile is failed!")
             sys.exit(0)
         except Exception as e:
             print("kkk",e)
@@ -323,7 +329,7 @@ class Example(QWidget):
         if path != None:
             self.debfile = DebFile(path)
             self.pkgname = self.debfile.name
-            text = get_icon.setLongTextToElideFormat(self.ui.version, "版本号： " + self.debfile.version)
+            text = get_icon.setLongTextToElideFormat(self.ui.version, _("version：") + self.debfile.version)
             if str(text).endswith("…") is True:
                 self.ui.version.setToolTip(self.debfile.version)
             self.parse = parseThread(self.pkgname)
@@ -336,13 +342,13 @@ class Example(QWidget):
             self.pkg_version = pkg.versions.keys()[0]
         if LAUNCH_MODE == 'normal':
             # self.ui.pkgname.setText()
-            self.ui.install.setText("一键安装")
-            text = get_icon.setLongTextToElideFormat(self.ui.pkgname, _("暂无可安装文件"))
+            self.ui.install.setText(_("installation"))
+            text = get_icon.setLongTextToElideFormat(self.ui.pkgname, _("select an installation file"))
             if str(text).endswith("…") is True:
-                self.ui.pkgname.setToolTip("暂无可安装文件")
-            self.ui.version.setText("版本号：暂无")
+                self.ui.pkgname.setToolTip(_("select an installation file"))
+            self.ui.version.setText(_("version：no"))
         elif LAUNCH_MODE == 'manual':
-            self.ui.install.setText("一键安装")
+            self.ui.install.setText(_("installation"))
             self.ui.install.clicked.connect(self.install_debfile)
             iconpath = get_icon.get_icon_path(str(self.debfile.name))
             text = get_icon.setLongTextToElideFormat(self.ui.pkgname, _(str(self.debfile.name)))  # 判断字符是否过长，自动生成省略号
@@ -352,24 +358,24 @@ class Example(QWidget):
                 self.ui.icon.setStyleSheet("QLabel{background-image:url('" + iconpath + "');background-color:transparent;background-position:center;background-repeat:none}")
         elif LAUNCH_MODE == 'remove':
             if pkg.is_installed:
-                self.ui.install.setText("一键卸载")
+                self.ui.install.setText(_("uninstallation"))
                 self.ui.install.clicked.connect(self.remove)
-                self.ui.version.setText("版本号：" + self.pkg_version)
+                self.ui.version.setText(_("version：") + self.pkg_version)
                 iconpath = get_icon.get_icon_path(str(self.pkg_name))
-                text = get_icon.setLongTextToElideFormat(self.ui.pkgname, _(str(self.pkg_name)))  # 判断字符是否过长，自动生成省略号
+                text = get_icon.setLongTextToElideFormat(self.ui.pkgname, _(self.pkg_name))  # 判断字符是否过长，自动生成省略号
                 if str(text).endswith("…") is True:
                     self.ui.pkgname.setToolTip(self.pkg_name)
                 if iconpath:
                     self.ui.icon.setStyleSheet("QLabel{background-image:url('" + iconpath + "');background-color:transparent;background-position:center;background-repeat:none}")
             else: #软件未安装时，提示信息
-                self.ui.install.setText("一键卸载")
+                self.ui.install.setText(_("uninstalled"))
                 self.ui.install.setStyleSheet("QPushButton{background-color:#A9A9A9;border:0px;font-size:16px;border-radius:4px;color:#ffffff}")
                 self.ui.install.setEnabled(False)
-                text = get_icon.setLongTextToElideFormat(self.ui.pkgname, _("该软件未安装"))
+                text = get_icon.setLongTextToElideFormat(self.ui.pkgname, _("software not installed"))
                 if str(text).endswith("…") is True:
-                    self.ui.pkgname.setToolTip("该软件未安装")
-                self.ui.version.setText("版本号：暂无")
-                iconpath = get_icon.get_icon_path(str(self.pkg_version))
+                    self.ui.pkgname.setToolTip("software not installed")
+                self.ui.version.setText(_("version：no"))
+                iconpath = get_icon.get_icon_path(self.pkg_version)
                 if iconpath:
                     self.ui.icon.setStyleSheet("QLabel{background-image:url('" + iconpath + "');background-color:transparent;background-position:center;background-repeat:none}")
 
@@ -406,14 +412,14 @@ class Example(QWidget):
     def parse_desktop(self, exec_word):
         self.exec_word = exec_word
         if self.exec_word != "":
-            self.ui.status_text.setText("安装完成")
-            self.ui.install.setText("立即体验")
+            self.ui.status_text.setText(_("installation is complete！"))
+            self.ui.install.setText(_("experience"))
             self.ui.install.setEnabled(True)
             self.ui.install.clicked.connect(self.experience)
             self.ui.install.clicked.disconnect(self.install_debfile)
         else:
-            self.ui.status_text.setText("安装完成")
-            self.ui.install.setText("安装完成")
+            self.ui.status_text.setText(_("installation is complete！"))
+            self.ui.install.setText(_("installed"))
             self.ui.install.setEnabled(False)
         self.ui.status_icon.setStyleSheet("QLabel{background-image:url('res/success.png')}")
         self.ui.loding.stop()
@@ -438,7 +444,7 @@ class Example(QWidget):
     # 函数：开始安装后，修改ui界面
     #
     def start_install(self):
-        self.ui.status.setText("正在安装...")
+        self.ui.status.setText(_("installing..."))
         self.ui.status.show()
         self.ui.install.hide()
         self.ui.loding.start()
@@ -452,10 +458,11 @@ class Example(QWidget):
             self.parse.start()
             return
         else:
-            self.ui.status_text.setText("安装失败")
-            self.ui.install.setText("安装失败")
+            self.ui.status_text.setText(_("Installation failed"))
+            self.ui.install.setText(_("failed"))
             self.ui.status_icon.setStyleSheet("QLabel{background-image:url('res/error.png')}")
             self.ui.install.setEnabled(False)
+            self.ui.install.setStyleSheet("QPushButton{background-color:#ffffff")
         self.ui.loding.stop()
         self.ui.status.hide()
         self.ui.pkgname.hide()
@@ -472,7 +479,7 @@ class Example(QWidget):
     # 函数：开始卸载后，修改UI界面
     #
     def start_remove(self):
-        self.ui.status.setText("正在卸载...")
+        self.ui.status.setText(_("uninstalling..."))
         self.ui.status.show()
         self.ui.install.hide()
         self.ui.loding.start()
@@ -484,14 +491,14 @@ class Example(QWidget):
     def stop_remove(self, percent):
         if percent > 0:
             # self.messageBox.alert_msg("安装完成")
-            self.ui.install.setText("卸载完成")
-            self.ui.status_text.setText("卸载完成！")
+            self.ui.install.setText(_("removed"))
+            self.ui.status_text.setText(_("uninstall complete！"))
             # self.ui.install.setStyleSheet("background-color:#999999")
             self.ui.install.setEnabled(False)
             self.ui.status_icon.setStyleSheet("QLabel{background-image:url('res/success.png')}")
         else:
-            self.ui.install.setText("卸载失败")
-            self.ui.status_text.setText("卸载失败！")
+            self.ui.install.setText(_("failed"))
+            self.ui.status_text.setText(_("uninstall failed！"))
             self.ui.install.setEnabled(False)
             self.ui.status_icon.setStyleSheet("QLabel{background-image:url('res/error.png')}")
         self.ui.loding.stop()
@@ -516,7 +523,7 @@ class Example(QWidget):
                     # self.ui.closeButton.setFlat(True)
                     self.ui.closeButton.setStyleSheet("QPushButton:hover{background-color:#F86457; border:0px; border-radius:4px}"
                                                       "QPushButton:click{background-color:#E44C50; border:0px; border-radius:4px}")
-                elif event.type() == self.ui.closeButton:
+                elif event.type() == QEvent.Leave:
                     self.ui.closeButton.setIcon(QIcon.fromTheme("window-close-symbolic"))
                     self.ui.closeButton.setPalette(self.ui.palette)
                     self.ui.closeButton.setProperty("useIconHighlightEffect", True)
@@ -550,6 +557,13 @@ class Example(QWidget):
                                             "QPushButton:click{background-color:#DCDCDC}")
             self.ui.menuButton.hide()
 
+    #
+    # 右键任务栏图标点击关闭触发
+    #
+    def closeEvent(self, event):
+        print("close")
+        self.slot_close()
+
 def check_local_deb_file(url):
     return os.path.isfile(url)
 
@@ -579,8 +593,8 @@ if __name__ == "__main__":
     QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
     QCoreApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
     app = QApplication(sys.argv)
-    # QApplication.setApplicationName("安装管理器")
-    # QApplication.setWindowIcon(QIcon("res/logo.png"))
+    QApplication.setApplicationName("麒麟应用安装器")
+    QApplication.setWindowIcon(QIcon("res/kylin-installer-64.svg"))
     argn = len(sys.argv)
     if(argn == 1):
         LAUNCH_MODE = 'normal'
