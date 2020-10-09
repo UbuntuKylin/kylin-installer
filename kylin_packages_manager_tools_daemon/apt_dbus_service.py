@@ -133,12 +133,12 @@ class PackagesManagerDbusService(dbus.service.Object):
         #获取软件包名
         pkgName = debfile._sections["Package"]
         debfile.check() #do debfile.check for the next to do debfile.missing_deps
-        print("len:%s" % len(debfile.missing_deps))
+        # print("len:%s" % len(debfile.missing_deps))
         # 安装源中存在的依赖包
         if len(debfile.missing_deps) != 0:
             for deb in debfile.missing_deps:
                 pkg = self.get_pkg_by_name(deb)
-                print("lj.pkg:%s" %pkg)
+                # print("lj.pkg:%s" %pkg)
                 pkg.mark_install()
                 try:
                     self.cache.commit(None, None)
