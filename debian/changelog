@@ -1,6 +1,15 @@
+kylin-installer (0.1.4kord) v100; urgency=medium
+
+  * 修复v10-u系统中没有屏蔽主题切换的问题
+  * 解决了可以打开多个应用的问题
+  * 安装卸载后界面调整
+
+ -- lijiang (rain) <lijiang@kylinos.cn>  Tue, 27 Oct 2020 09:02:19 +0800
+
 kylin-installer (0.1.3kord) v100; urgency=medium
 
   * 增加软件国际化，支持中英文。
+  * 卸载完成后，界面调整
   * 解决任务栏中无图标的bug
 
  -- lijiang (rain) <lijiang@kylinos.cn>  Fri, 25 Sep 2020 17:33:31 +0800
