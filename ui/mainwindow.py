@@ -53,8 +53,8 @@ class Ui_MainWindow(QWidget):
 
         self.message = QLabel(self.centralWidget)
         self.message.setObjectName(_fromUtf8("message"))
-        self.message.setGeometry(95, 98, 400, 64)
-        # self.message.setStyleSheet("QLabel{background-color:blue}")
+        self.message.setGeometry(95, 98, 400, 80)
+        # self.message.setStyleSheet("QLabel{background-color:yellow}")
         self.messageLayout = QHBoxLayout(self.message)
         self.buttonLayout = QHBoxLayout(self.centralWidget)
 
@@ -88,7 +88,7 @@ class Ui_MainWindow(QWidget):
 
         self.tips=QLabel()
         self.tips.setObjectName(_fromUtf8("tips"))
-        self.tips.setFixedSize(200, 64)
+        self.tips.setFixedSize(200, 80)
         self.tips.setContentsMargins(0,0,0,0)
         # self.tips.setStyleSheet("QLabel{background-color:blue}")
         self.pkgname=QLabel(self.tips) #软件包名label
@@ -102,12 +102,13 @@ class Ui_MainWindow(QWidget):
         self.pkgname.setGeometry(QtCore.QRect(0, 8, 200, 30))
         self.pkgname.setAlignment(Qt.AlignLeft | Qt.AlignBottom)
         self.pathwidth = QFontMetrics(self.pkgname.font())
+
         # self.pkgname.setText("茄子摄像头")
 
         #设置软件版本信息
         self.version=QLabel(self.tips)
         self.version.setObjectName(_fromUtf8("version"))
-        self.version.setGeometry(QtCore.QRect(0, 46, 200, 12))
+        self.version.setGeometry(QtCore.QRect(0, 46, 250, 15))
         self.version.setContentsMargins(0,0,0,0)
         # self.version.setAlignment(Qt.AlignLeft | Qt.AlignBottom)
         self.version_ft = QFont()
@@ -117,6 +118,16 @@ class Ui_MainWindow(QWidget):
         self.version.setFont(self.version_ft)
         # self.version.setStyleSheet(".QLabel{border:0px;font-size:12px;color:#444444;font-family:Microsoft YaHei}")
         # self.Version.setAlignment(Qt.AlignLeft)
+        # self.pkgname.setStyleSheet("QLabel{background-color:red}")
+        # self.version.setStyleSheet("QLabel{background-color:blue}")
+        self.tips_layout = QVBoxLayout()
+        self.tips_layout.setSpacing(0)
+        self.tips_layout.addStretch()
+        self.tips_layout.addWidget(self.pkgname)
+        self.tips_layout.addSpacing(5)
+        self.tips_layout.addWidget(self.version)
+        self.tips_layout.addStretch()
+        self.tips.setLayout(self.tips_layout)
 
         self.messageLayout.addStretch()
         self.messageLayout.addWidget(self.icon)
