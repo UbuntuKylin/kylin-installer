@@ -97,6 +97,7 @@ class Example(QWidget):
     MAIN_WIDTH_NORMAL=500
     MAIN_HEIGHT_NORMAL=350
     resizeFlag =False
+    UKUI3=False
     def __init__(self, model):
         super(Example, self).__init__()
         # self.dbus_Thread = initThread()
@@ -210,17 +211,6 @@ class Example(QWidget):
             ref = QRectF(10 - i, 10 - i, self.width() - (10 - i) * 2, self.height() - (10 - i) * 2)
             # i_path.addRect(ref)
             if i == 0:
-                # print("i:" + str(i))
-                # opt = QStyleOption()
-                # opt.initFrom(self)
-                # p = QPainter(self)
-                # p.setRenderHint(QPainter.Antialiasing)
-                # p.setBrush(opt.palette.base().color())
-                # p.setPen(Qt.transparent)
-                # p.setPen(Qt.NoPen)
-                # # p.drawRect(opt.rect)
-                # p.drawRoundedRect(ref, 8, 8)
-                # self.style().drawPrimitive(QStyle.PE_Widget, opt, p, self)
                 pass
             else:
                 i_path.addRoundedRect(ref, self.border_width, self.border_width)
@@ -255,46 +245,6 @@ class Example(QWidget):
         self.style().drawPrimitive(QStyle.PE_Widget, opt, p, self)
 
     #
-    # 函数：paintevent绘制阴影
-    #
-    # def paintEvent(self, event):
-    #     print("llllllljjjjjjjj")
-    #     p = QPainter(self)
-    #     p.setRenderHint(QPainter.Antialiasing)
-    #     rectPath = QPainterPath()
-    #     rect = self.rect()
-    #     rect.setLeft(6)
-    #     rect.setTop(6)
-    #     rect.setWidth(rect.width() - 6)
-    #     rect.setHeight(rect.height() - 6)
-    #     rectPath.addRoundedRect(rect,6,6)
-    #     pixmap = QPixmap(self.rect().size())
-    #     pixmap.fill(Qt.transparent)
-    #     pixmapPainter = QPainter(pixmap)
-    #     pixmapPainter.setRenderHint(QPainter.Antialiasing)
-    #     pixmapPainter.setPen(Qt.transparent)
-    #     pixmapPainter.setBrush(Qt.black)
-    #     pixmapPainter.drawPath(rectPath)
-    #     pixmapPainter.end()
-    #
-    #     img = pixmap.toImage()
-    #
-    #     pixmap = QPixmap.fromImage(img)
-    #     pixmapPainter2 = QPainter(pixmap)
-    #     pixmapPainter2.setRenderHint(QPainter.Antialiasing)
-    #     pixmapPainter2.setCompositionMode(QPainter.CompositionMode_Clear)
-    #     pixmapPainter2.setPen(Qt.transparent)
-    #     pixmapPainter2.setBrush(Qt.transparent)
-    #     pixmapPainter2.drawPath(rectPath)
-    #
-    #     p.drawPixmap(self.rect(), pixmap, pixmap.rect())
-    #
-    #     opt = QStyleOption()
-    #
-    #     p.save()
-    #     p.fillPath(rectPath, opt.palette.color(QPalette.Base))
-    #     p.restore()
-    #
     #函数：关闭软件&退出dbus
     #
     def slot_close(self):
@@ -307,7 +257,7 @@ class Example(QWidget):
                 print("fcntl-error:close pidfile is failed!")
             sys.exit(0)
         except Exception as e:
-            print("kkk",e)
+            print("app_exit_error",e)
 
     #
     # 函數：卸载软件
@@ -417,18 +367,21 @@ class Example(QWidget):
             self.ui.install.setEnabled(True)
             self.ui.install.clicked.connect(self.experience)
             self.ui.install.clicked.disconnect(self.install_debfile)
+            self.ui.install.move(220, 229)
+            self.ui.install.show()
+            if "kylin-installer" in self.exec_word:
+                self.ui.install.clicked.connect(self.slot_close)
         else:
             self.ui.status_text.setText(_("installation is complete！"))
-            self.ui.install.setText(_("installed"))
-            self.ui.install.setEnabled(False)
+            self.ui.install.hide()
+            self.ui.status_icon.move(186,161)
+            self.ui.status_text.move(249,167)
         self.ui.status_icon.setStyleSheet("QLabel{background-image:url('res/success.png')}")
         self.ui.loding.stop()
         self.ui.status.hide()
         self.ui.pkgname.hide()
         self.ui.version.hide()
         self.ui.progressBar.hide()
-        self.ui.install.move(220,229)
-        self.ui.install.show()
         self.ui.icon.hide()
         self.ui.status_text.setFont(self.ui.status_text_ft)
         self.ui.status_text.show()
@@ -459,19 +412,16 @@ class Example(QWidget):
             return
         else:
             self.ui.status_text.setText(_("Installation failed"))
-            self.ui.install.setText(_("failed"))
-            self.ui.status_icon.setStyleSheet("QLabel{background-image:url('res/error.png')}")
-            self.ui.install.setEnabled(False)
-            self.ui.install.setStyleSheet("QPushButton{background-color:#ffffff")
+            self.ui.install.hide()
         self.ui.loding.stop()
         self.ui.status.hide()
         self.ui.pkgname.hide()
         self.ui.version.hide()
         self.ui.progressBar.hide()
-        self.ui.install.move(220,229)
-        self.ui.install.show()
         self.ui.icon.hide()
         self.ui.status_text.setFont(self.ui.status_text_ft)
+        self.ui.status_icon.move(186, 161)
+        self.ui.status_text.move(249, 167)
         self.ui.status_text.show()
         self.ui.status_icon.show()
 
@@ -490,16 +440,10 @@ class Example(QWidget):
     #
     def stop_remove(self, percent):
         if percent > 0:
-            # self.messageBox.alert_msg("安装完成")
-            self.ui.install.setText(_("removed"))
             self.ui.status_text.setText(_("uninstall complete！"))
-            # self.ui.install.setStyleSheet("background-color:#999999")
-            self.ui.install.setEnabled(False)
             self.ui.status_icon.setStyleSheet("QLabel{background-image:url('res/success.png')}")
         else:
-            self.ui.install.setText(_("failed"))
             self.ui.status_text.setText(_("uninstall failed！"))
-            self.ui.install.setEnabled(False)
             self.ui.status_icon.setStyleSheet("QLabel{background-image:url('res/error.png')}")
         self.ui.loding.stop()
         self.ui.status.hide()
@@ -512,12 +456,15 @@ class Example(QWidget):
         self.ui.status_text.setFont(self.ui.status_text_ft)
         self.ui.status_text.show()
         self.ui.status_icon.show()
+        self.ui.install.hide()
+        self.ui.status_icon.move(186, 161)
+        self.ui.status_text.move(249, 167)
 
     #
     # 函数：过滤事件，设置关闭按钮状态
     #
     def eventFilter(self, watched, event):
-        if str(os.getenv("QT_QPA_PLATFORMTHEME")) == "ukui":
+        if self.UKUI3 == True:
             if watched == self.ui.closeButton:
                 if event.type() == QEvent.Enter:
                     # self.ui.closeButton.setFlat(True)
@@ -545,10 +492,30 @@ class Example(QWidget):
     # 函数：做ukui的主题判断，不存在则进行额外处理操作
     #
     def ukui_judge(self):
-        if str(os.getenv("QT_QPA_PLATFORMTHEME")) == "ukui" :
-            self.ui.closeButton.setIcon(QIcon.fromTheme("window-close-symbolic"))
-            self.ui.minButton.setIcon(QIcon.fromTheme("window-minimize-symbolic"))
-        else:
+        if str(os.getenv("QT_QPA_PLATFORMTHEME")) == "ukui":
+            if os.path.exists("/etc/kylin-build"):
+                fp = open("/etc/kylin-build")
+                if fp.read().split(" ")[1].strip("\n") != "V10":
+                    self.UKUI3 = True
+                    self.ui.closeButton.setIcon(QIcon.fromTheme("window-close-symbolic"))
+                    self.ui.minButton.setIcon(QIcon.fromTheme("window-minimize-symbolic"))
+                else:
+                    self.UKUI3 = False
+                    self.ui.closeButton.setStyleSheet(
+                        "QPushButton{border:none;background-image:url('res/window-close-symbolic.svg');background-position:center;background-repeat:none}"
+                        "QPushButton:hover{background-color:#E44C50}"
+                        "QPushButton:click{backgorund-color:#E44C50}")
+                    self.ui.minButton.setStyleSheet(
+                        "QPushButton{border:none;background-image:url('res/window-minimize-symbolic.svg');background-position:center;background-repeat:none}"
+                        "QPushButton:hover{background-color:#DCDCDC}"
+                        "QPushButton:click{background-color:#DCDCDC}")
+                    self.ui.menuButton.hide()
+            else:
+                self.UKUI3 = True
+                self.ui.closeButton.setIcon(QIcon.fromTheme("window-close-symbolic"))
+                self.ui.minButton.setIcon(QIcon.fromTheme("window-minimize-symbolic"))
+        elif os.getenv("QT_QPA_PLATFORMTHEME") == None:
+            self.UKUI3 = False
             self.ui.closeButton.setStyleSheet("QPushButton{border:none;background-image:url('res/window-close-symbolic.svg');background-position:center;background-repeat:none}"
                                               "QPushButton:hover{background-color:#E44C50}"
                                               "QPushButton:click{backgorund-color:#E44C50}")
@@ -557,7 +524,7 @@ class Example(QWidget):
                                             "QPushButton:click{background-color:#DCDCDC}")
             self.ui.menuButton.hide()
 
-    #
+    #QT_QPA_PLATFORMTHEME
     # 右键任务栏图标点击关闭触发
     #
     def closeEvent(self, event):
@@ -573,7 +540,8 @@ def check_local_deb_file(url):
 pidfile=0
 def app_instance():
     global pidfile
-    pidfile = open(os.path.realpath(__file__), "r")
+    homePath = QStandardPaths.standardLocations(QStandardPaths.HomeLocation)
+    pidfile = open(str(homePath[0]+ "/.config/kylin-installer%1.lock").replace("%1",os.getenv("DISPLAY")),"w+")
     try:
         fcntl.flock(pidfile, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except:
@@ -590,10 +558,16 @@ def close_filelock():
 
 if __name__ == "__main__":
     app_instance()
-    QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
-    QCoreApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
+    #4k判断
+    cmd = "dpkg -l | grep libqt5gui | awk '{print $3}'"
+    version = os.popen(cmd).readline().strip("\n")
+    if ("~" in version):
+        if ("k" in version.split("~")[1]):
+            if (int(version.split("~")[1].split("k")[1]) >= 4):
+                QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
+                QCoreApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
     app = QApplication(sys.argv)
-    QApplication.setApplicationName("麒麟应用安装器")
+    QApplication.setApplicationName(_("kylin-application-installer"))
     QApplication.setWindowIcon(QIcon("res/kylin-installer-64.svg"))
     argn = len(sys.argv)
     if(argn == 1):
@@ -622,13 +596,13 @@ if __name__ == "__main__":
             else:
                 sys.exit(0)
     if LAUNCH_MODE == 'manual':
-        print("manul")
+        #print("manul")
         ex = Example('install')
     elif LAUNCH_MODE == 'remove':
-        print("remove")
+        #print("remove")
         ex = Example('remove')
     else:
-        print("normal")
+        #print("normal")
         ex = Example('normal')
     ex.show()
     signal.signal(signal.SIGINT, lambda : close_filelock())
