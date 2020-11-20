@@ -33,7 +33,8 @@ import dbus
 import dbus.service
 import dbus.mainloop.glib
 from apt.debfile import DebPackage
-from kylin_packages_manager_tools_daemon.apt_daemon import AppActions, AptProcess
+from kylin_packages_manager_tools_daemon.apt_daemon import AppActions, AptProcess, FetchProcess
+
 from gi.repository import GObject
 
 
@@ -106,7 +107,7 @@ class PackagesManagerDbusService(dbus.service.Object):
     #
     @dbus.service.method(INTERFACE, in_signature='s', out_signature='b', sender_keyword='sender')
     def install_debfile(self, path, sender=None):
-        print("####install deb file: ", path)
+        # print("####install deb file: ", path)
         # 开启密码认证机制
         granted = self.auth_with_policykit(sender, PACKAGES_MANAGER_TOOLS)
         if not granted:
@@ -141,7 +142,7 @@ class PackagesManagerDbusService(dbus.service.Object):
                 # print("lj.pkg:%s" %pkg)
                 pkg.mark_install()
                 try:
-                    self.cache.commit(None, None)
+                    self.cache.commit(FetchProcess(self, deb, AppActions.INSTALL_ONE), None)
                 except apt.cache.LockFailedException:
                     raise WorkitemError(3, "package manager is running.")
         #安装软件包
@@ -173,7 +174,7 @@ class PackagesManagerDbusService(dbus.service.Object):
     #
     @dbus.service.method(INTERFACE, in_signature='s', out_signature='b', sender_keyword='sender')
     def remove(self, pkgName, sender=None):
-        print("####remove: ", pkgName)
+        # print("####remove: ", pkgName)
         # 开启密码认证
         granted = self.auth_with_policykit(sender, PACKAGES_MANAGER_TOOLS)
         if not granted:
@@ -223,6 +224,14 @@ class PackagesManagerDbusService(dbus.service.Object):
     def exit(self):
         self.mainloop.quit()
         sys.exit(0)
+
+    #
+    # 函数：删除缓存包
+    #
+    @dbus.service.method(INTERFACE, in_signature='s', out_signature='')
+    def rm_cache_pkgs(self, path):
+        cmd = "rm " + path
+        os.system(cmd)
 
     #
     # 信号：发送认证信号

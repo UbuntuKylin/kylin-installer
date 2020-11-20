@@ -33,15 +33,12 @@ import locale
 import logging
 
 from PyQt5.QtCore import *
-from PyQt5 import QtDBus
-
+from xdg import BaseDirectory as xdg
 from dbus.mainloop.glib import DBusGMainLoop
 mainloop = DBusGMainLoop(set_as_default=True)
-#from dbus.mainloop.qt import DBusQtMainLoop
-#mainloop = DBusQtMainLoop()
 
 import gettext
-gettext.textdomain("ubuntu-kylin-software-center")
+gettext.textdomain("kylin-installer")
 _ = gettext.gettext
 
 LOG = logging.getLogger("uksc")
@@ -50,6 +47,7 @@ DBUS_INTERFACE_PATH = "com.kylin.packages.manager.tools"
 INSTALLDEPS = "install_deps"
 INSTALLDEBFILE = "install_debfile"
 REMOVE = "remove"
+CACHE_PATH = os.path.join(xdg.xdg_cache_home, "kylin-installer/debfile/*.deb")
 
 AptActionMsg = {
     "install_deps":_("Install dependencies"),
@@ -58,7 +56,8 @@ AptActionMsg = {
     "remove":_("Software uninstall"),
     "upgrade":_("Software upgrade"),
     "update":_("Source update"),
-    "update_first":_("Source initialization")
+    "update_first":_("Source initialization"),
+    "insdep":_("Install dependency")
 }
 AptProcessMsg = {
     "apt_start":_("Start..."),
@@ -92,22 +91,14 @@ class InstallBackend(QObject):
         try:
             bus = dbus.SystemBus(mainloop)
         except Exception as e:
-            #self.init_models_ready.emit("fail","初始化失败!")
-            # self.init_models_ready.emit("fail", _("Initialization failed"))
             return False
         try:
             obj = bus.get_object(DBUS_SERVICE_PATH,'/')
-            #proxy = dbus.ProxyObject(obj,UBUNTUKYLIN_INTERFACE_PATH)
             self.iface = dbus.Interface(obj, dbus_interface=DBUS_INTERFACE_PATH)
-#            self.call_dbus_iface("check_source_ubuntukylin")
-            # self.iface.connect_to_signal("software_fetch_signal",self._on_software_fetch_signal)
             self.iface.connect_to_signal("software_apt_signal",self._on_software_apt_signal)
             self.iface.connect_to_signal("software_auth_signal",self._on_software_auth_signal)
+            self.rm_cache_pkgs(CACHE_PATH)
         except dbus.DBusException as e:
-#            bus_name = dbus.service.BusName('com.ubuntukylin.softwarecenter', bus)
-#            self.dbusControler = SoftwarecenterDbusController(self, bus_name)
-#           self.init_models_ready.emit("fail","初始化失败!")
-#             self.init_models_ready.emit("fail",_("Initialization failed"))
             LOG.error("dbus exception:%s" % str(e))
             return False
         return True
@@ -134,6 +125,12 @@ class InstallBackend(QObject):
     #
     def exit(self):
         self.call_dbus_iface('exit')
+
+    #
+    # 函数：删除用户目录下缓存的包
+    #
+    def rm_cache_pkgs(self, path):
+        self.call_dbus_iface("rm_cache_pkgs", path)
     #
     # 函数：安装多个deb包调用
     #
@@ -181,7 +178,7 @@ class InstallBackend(QObject):
         percent = float(str(kwarg['apt_percent']))
         action = str(kwarg['action'])
         sendMsg = AptActionMsg[action] + AptProcessMsg[str(type)]
-        print("send over")
+        # print("send over")
         self.dbus_apt_process.emit(appname,sendType,action,percent,sendMsg)
 
     #
@@ -198,5 +195,5 @@ class InstallBackend(QObject):
         elif type == "auth_ensure":
             sendType = "ensure"
             sendMsg = _("Operation ensure")
-        print("type :%s" % type)
+        # print("type :%s" % type)
         self.dbus_apt_process.emit(appname,sendType,action,0,sendMsg)

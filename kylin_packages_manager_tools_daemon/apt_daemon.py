@@ -9,6 +9,7 @@ import socket
 class AppActions:
     INSTALLDEPS = "install_deps"
     INSTALLDEBFILE = "install_debfile"
+    INSTALL_ONE = "insdep"
     INSTALL = "install"
     REMOVE = "remove"
     UPGRADE = "upgrade"
@@ -16,6 +17,76 @@ class AppActions:
     APPLY = "apply_changes"
     PURCHASE = "purchase"
     UPDATE = "update"
+
+class FetchProcess(apb.AcquireProgress):
+    taskPkgs = []
+
+    def __init__(self, dbus_service, appname, action):
+        apb.AcquireProgress.__init__(self)
+        self.dbus_service = dbus_service
+        self.appname = appname
+        self.action = action
+
+    #
+    # 函数:下载结束
+    # item:下载的item
+    #
+    def done(self, item):
+        pass
+
+    #
+    # 函数:下载失败
+    # item:下载的item
+    #
+    def fail(self, item):
+        self.percent = -200
+        kwarg = {"apt_appname":self.appname,
+                 "apt_percent":str(self.percent),
+                 "action":str(self.action),
+                 }
+
+        self.dbus_service.software_apt_signal("down_fail", kwarg)
+        # print("send fail")
+
+    #
+    # 函数:接收数据
+    # item:下载的item
+    #
+    def fetch(self, item):
+        pass
+
+    #
+    # 函数:接触到ims
+    # item:下载的item
+    #
+    def ims_hit(self, item):
+        #print 'ims_hit'
+        pass
+
+    #
+    # 函数:媒介切换
+    # media:媒介
+    #
+    def media_change(self, media, drive):
+        #print 'media_change'
+        pass
+
+    #
+    # 函数:下载心跳状态
+    #
+    def pulse(self, owner):
+        pass
+    #
+    # 函数:开始下载
+    #
+    def start(self):
+        pass
+
+    #
+    # 函数:下载停止
+    #
+    def stop(self):
+        pass
 
 class AptProcess(apb.InstallProgress):
     '''Apt progress'''
