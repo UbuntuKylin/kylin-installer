@@ -33,6 +33,7 @@ LOG = logging.getLogger("install")
 LAUNCH_MODE=''
 REMOVE_SOFT=''
 LOCAL_DEB_FILE=''
+MAXLENGTH = 321
 
 class  initThread(QThread):
     backend = None
@@ -75,7 +76,7 @@ class parseThread(QThread, QObject):
     def run(self):
         exec_word = None
         self.desktop_path = "/usr/share/applications/" + self.pkgname + ".desktop"
-        print("desktop_path:%s" % self.desktop_path)
+        # print("desktop_path:%s" % self.desktop_path)
         #判断是否存在同名的desktop文件
         if os.path.exists(self.desktop_path):
             setting = QSettings(self.desktop_path, QSettings.IniFormat)
@@ -86,7 +87,6 @@ class parseThread(QThread, QObject):
             self.debfile = DebPackage(LOCAL_DEB_FILE)
             for desktop in self.debfile.filelist:
                 if desktop.endswith(".desktop"):
-                    print(desktop)
                     self.desktop = desktop
                     setting = QSettings("/" + self.desktop, QSettings.IniFormat)
                     setting.beginGroup("Desktop Entry")
@@ -257,7 +257,7 @@ class Example(QWidget):
                 print("fcntl-error:close pidfile is failed!")
             sys.exit(0)
         except Exception as e:
-            print("app_exit_error",e)
+            print("app_exit_error:",e)
 
     #
     # 函數：卸载软件
@@ -278,56 +278,80 @@ class Example(QWidget):
     def show_softinfo(self,path=None,softname=None):
         if path != None:
             self.debfile = DebFile(path)
-            self.pkgname = self.debfile.name
-            text = get_icon.setLongTextToElideFormat(self.ui.version, _("version：") + self.debfile.version)
-            if str(text).endswith("…") is True:
-                self.ui.version.setToolTip(self.debfile.version)
+            self.install_pkgname = self.debfile.name
+            self.install_version = _("version: ") + self.debfile.version
             self.parse = parseThread(self.pkgname)
             self.parse.parse_over.connect(self.parse_desktop)
             self.exec_word = None
         elif softname != None:
             self.cache = apt.Cache()
             pkg = self.cache[softname]
-            self.pkg_name = pkg.shortname
-            self.pkg_version = pkg.versions.keys()[0]
+            self.uninstall_pkgname = pkg.shortname
+            self.uninstall_version = _("version: ") + pkg.versions.keys()[0]
         if LAUNCH_MODE == 'normal':
-            # self.ui.pkgname.setText()
             self.ui.install.setText(_("installation"))
-            text = get_icon.setLongTextToElideFormat(self.ui.pkgname, _("select an installation file"))
-            if str(text).endswith("…") is True:
-                self.ui.pkgname.setToolTip(_("select an installation file"))
-            self.ui.version.setText(_("version：no"))
+            self.adaptiveLength(_("select an installation file"), _("version：no"))  # 设置包名、版本信息
         elif LAUNCH_MODE == 'manual':
             self.ui.install.setText(_("installation"))
             self.ui.install.clicked.connect(self.install_debfile)
-            iconpath = get_icon.get_icon_path(str(self.debfile.name))
-            text = get_icon.setLongTextToElideFormat(self.ui.pkgname, _(str(self.debfile.name)))  # 判断字符是否过长，自动生成省略号
-            if str(text).endswith("…") is True:
-                self.ui.pkgname.setToolTip(self.debfile.name)
+            self.adaptiveLength(self.install_pkgname, self.install_version)  # 设置包名、版本信息
+            iconpath = get_icon.get_icon_path(str(self.install_pkgname))
             if iconpath:
                 self.ui.icon.setStyleSheet("QLabel{background-image:url('" + iconpath + "');background-color:transparent;background-position:center;background-repeat:none}")
         elif LAUNCH_MODE == 'remove':
             if pkg.is_installed:
                 self.ui.install.setText(_("uninstallation"))
                 self.ui.install.clicked.connect(self.remove)
-                self.ui.version.setText(_("version：") + self.pkg_version)
-                iconpath = get_icon.get_icon_path(str(self.pkg_name))
-                text = get_icon.setLongTextToElideFormat(self.ui.pkgname, _(self.pkg_name))  # 判断字符是否过长，自动生成省略号
-                if str(text).endswith("…") is True:
-                    self.ui.pkgname.setToolTip(self.pkg_name)
+                self.adaptiveLength(self.uninstall_pkgname, self.uninstall_version)  # 设置包名、版本信息
+                iconpath = get_icon.get_icon_path(str(self.uninstall_pkgname))
                 if iconpath:
                     self.ui.icon.setStyleSheet("QLabel{background-image:url('" + iconpath + "');background-color:transparent;background-position:center;background-repeat:none}")
             else: #软件未安装时，提示信息
                 self.ui.install.setText(_("uninstalled"))
                 self.ui.install.setStyleSheet("QPushButton{background-color:#A9A9A9;border:0px;font-size:16px;border-radius:4px;color:#ffffff}")
                 self.ui.install.setEnabled(False)
-                text = get_icon.setLongTextToElideFormat(self.ui.pkgname, _("software not installed"))
-                if str(text).endswith("…") is True:
-                    self.ui.pkgname.setToolTip("software not installed")
-                self.ui.version.setText(_("version：no"))
-                iconpath = get_icon.get_icon_path(self.pkg_version)
+                self.adaptiveLength(_("version：no"), _("software not installed"))  # 设置包名、版本信息
+                iconpath = get_icon.get_icon_path(self.uninstall_version)
                 if iconpath:
                     self.ui.icon.setStyleSheet("QLabel{background-image:url('" + iconpath + "');background-color:transparent;background-position:center;background-repeat:none}")
+
+    #
+    # 函数：自动调整包名的长度
+    #
+    def adaptiveLength(self, name_text, version_text):
+        self.ui.pkgname.setText(name_text)
+        self.ui.version.setText(version_text)
+        #获取当前label内容的总长度
+        name_width = self.ui.pkgname.fontMetrics().boundingRect(self.ui.pkgname.text()).width()
+        version_width = self.ui.version.fontMetrics().boundingRect(self.ui.version.text()).width()
+        self.ui.pkgname.setFixedSize(name_width, 30)
+        self.ui.version.setFixedSize(version_width, 15)
+        #根据长度自动进行调整外框大小
+        if name_width >= version_width:
+            if name_width < MAXLENGTH:
+                self.ui.tips.setFixedWidth(name_width)
+            else:
+                self.ui.tips.setFixedWidth(MAXLENGTH)
+        else:
+            if version_width < MAXLENGTH:
+                self.ui.tips.setFixedWidth(version_width)
+            else:
+                self.ui.tips.setFixedWidth(MAXLENGTH)
+        #边界情况，长度过长使用tooltips进行显示
+        if name_width >= MAXLENGTH:
+            self.ui.pkgname.setFixedWidth(MAXLENGTH)
+            text = get_icon.setLongTextToElideFormat(self.ui.pkgname, _(str(name_text)))  # 判断字符是否过长，自动生成省略号
+            if str(text).endswith("…") is True:
+                self.ui.pkgname.setToolTip(name_text)
+        else:
+            self.ui.pkgname.setFixedWidth(name_width)
+        if version_width >= MAXLENGTH:
+            self.ui.version.setFixedWidth(MAXLENGTH)
+            text = get_icon.setLongTextToElideFormat(self.ui.version, _(str(version_text)))  # 判断字符是否过长，自动生成省略号
+            if str(text).endswith("…") is True:
+                self.ui.version.setToolTip(version_text)
+        else:
+            self.ui.version.setFixedWidth(version_width)
 
     #
     # 函数：接收后台信号修改包状态
@@ -338,7 +362,7 @@ class Example(QWidget):
             if processtype == "apt" and percent < 0:
                 self.stop_install(percent)
             elif processtype == "apt" and percent == 200:
-                print("install over")
+                # print("install over")
                 self.stop_install(percent)
             elif processtype == "cancel" and percent == 0:
                 # self.stop_install()
@@ -355,6 +379,30 @@ class Example(QWidget):
                 pass
             elif processtype == "ensure":
                 self.start_remove()
+        elif action == AppActions.INSTALL_ONE:
+            self.down_deps_failed()
+
+    #
+    # 函数：依赖下载失败
+    #
+    def down_deps_failed(self):
+        self.ui.loding.stop()
+        self.ui.status.hide()
+        self.ui.pkgname.hide()
+        self.ui.version.hide()
+        self.ui.progressBar.hide()
+        self.ui.icon.hide()
+        self.ui.status_text.setFont(self.ui.status_text_ft)
+        self.ui.status_icon.move(186, 161)
+        self.ui.status_text.move(249, 167)
+        self.ui.status_text.show()
+        self.ui.status_icon.show()
+        self.ui.status_text.setText(_("Installation failed"))
+        self.ui.status_icon.setStyleSheet("QLabel{background-image:url('res/error.png')}")
+        #pa = QPalette()
+        #pa.setColor(Qt.red)
+        #self.ui.status_text.setStyleSheet("QLabel{color:red}")
+
 
     #
     # 函数：安装完成后解析desktop文件
@@ -392,6 +440,7 @@ class Example(QWidget):
     #
     def experience(self):
         subprocess.Popen(self.exec_word)
+        self.slot_close()
 
     #
     # 函数：开始安装后，修改ui界面
@@ -412,6 +461,7 @@ class Example(QWidget):
             return
         else:
             self.ui.status_text.setText(_("Installation failed"))
+            self.ui.status_icon.setStyleSheet("QLabel{background-image:url('res/error.png')}")
             self.ui.install.hide()
         self.ui.loding.stop()
         self.ui.status.hide()
@@ -528,7 +578,6 @@ class Example(QWidget):
     # 右键任务栏图标点击关闭触发
     #
     def closeEvent(self, event):
-        print("close")
         self.slot_close()
 
 def check_local_deb_file(url):
