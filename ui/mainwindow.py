@@ -82,6 +82,7 @@ class Ui_MainWindow(QWidget):
         self.title_text.setFont(self.title_text_ft)
         # self.title_text.setAlignment(Qt.AlignLeft | Qt.AlignBottom)
 
+        #设置安装的软件图标
         self.icon=QLabel(self.centralWidget)
         self.icon.setObjectName(_fromUtf8("icon"))
         self.icon.setFixedSize(64, 64)
@@ -91,10 +92,11 @@ class Ui_MainWindow(QWidget):
         self.tips.setFixedSize(200, 80)
         self.tips.setContentsMargins(0,0,0,0)
         # self.tips.setStyleSheet("QLabel{background-color:blue}")
+        #软件的包名
         self.pkgname=QLabel(self.tips) #软件包名label
         self.pkgname.setObjectName(_fromUtf8("pkgname"))
         self.pkgname.setContentsMargins(0,0,0,0)
-        # self.pkgname.setStyleSheet("QLabel{background-color:red}")
+
         self.pkgname_ft = QFont()
         self.pkgname_ft.setFamily("Microsoft YaHei")
         self.pkgname_ft.setPixelSize(26)
@@ -112,15 +114,13 @@ class Ui_MainWindow(QWidget):
         self.version.setContentsMargins(0,0,0,0)
         # self.version.setAlignment(Qt.AlignLeft | Qt.AlignBottom)
         self.version_ft = QFont()
-        # self.version_ft.setBold(True)
         self.version_ft.setFamily("Microsoft YaHei")
         self.version_ft.setPixelSize(12)
         self.version.setFont(self.version_ft)
-        # self.version.setStyleSheet(".QLabel{border:0px;font-size:12px;color:#444444;font-family:Microsoft YaHei}")
-        # self.Version.setAlignment(Qt.AlignLeft)
         # self.pkgname.setStyleSheet("QLabel{background-color:red}")
         # self.version.setStyleSheet("QLabel{background-color:blue}")
         self.tips_layout = QVBoxLayout()
+        self.tips_layout.setContentsMargins(0,0,0,0)
         self.tips_layout.setSpacing(0)
         self.tips_layout.addStretch()
         self.tips_layout.addWidget(self.pkgname)

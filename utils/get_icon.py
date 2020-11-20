@@ -64,6 +64,5 @@ def setLongTextToElideFormat(label, text):
     metrics = QFontMetrics(label.font())
     # print(label.width())
     elidedText = metrics.elidedText(text, Qt.ElideRight, label.width())
-    # print("wdith %d" % int(label.width()))
     label.setText(_(elidedText))
     return elidedText

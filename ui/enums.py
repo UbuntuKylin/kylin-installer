@@ -2,6 +2,7 @@ class AppActions:
     INSTALLDEPS = "install_deps"
     INSTALLDEBFILE = "install_debfile"
     DOWNLOADAPK = "download_apk"
+    INSTALL_ONE = "insdep"
     INSTALL = "install"
     REMOVE = "remove"
     UPGRADE = "upgrade"
