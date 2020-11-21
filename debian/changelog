@@ -1,3 +1,9 @@
+kylin-installer (0.1.7kord) v100; urgency=medium
+
+  * 修改上个版本命令行安装失败的问题
+
+ -- lijiang (rain) <lijiang@kylinos.cn>  Sat, 21 Nov 2020 13:36:42 +0800
+
 kylin-installer (0.1.6kord) v100; urgency=medium
 
   * 修改了包名、版本信息显示方式，可以动态调整长度

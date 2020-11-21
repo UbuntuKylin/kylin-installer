@@ -280,7 +280,7 @@ class Example(QWidget):
             self.debfile = DebFile(path)
             self.install_pkgname = self.debfile.name
             self.install_version = _("version: ") + self.debfile.version
-            self.parse = parseThread(self.pkgname)
+            self.parse = parseThread(self.install_pkgname)
             self.parse.parse_over.connect(self.parse_desktop)
             self.exec_word = None
         elif softname != None:
