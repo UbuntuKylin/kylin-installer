@@ -19,7 +19,7 @@ msgstr ""
 
 #: kylin-installer.py:328 kylin-installer.py:359 kylin-installer.py:321
 #: kylin-installer.py:352 kylin-installer.py:282 kylin-installer.py:313
-msgid "version："
+msgid "version: "
 msgstr "版本号："
 
 #: kylin-installer.py:341 kylin-installer.py:347 kylin-installer.py:334
@@ -34,7 +34,7 @@ msgstr "请选择一个安装文件"
 
 #: kylin-installer.py:345 kylin-installer.py:373 kylin-installer.py:338
 #: kylin-installer.py:366 kylin-installer.py:299 kylin-installer.py:327
-msgid "version：no"
+msgid "version: no"
 msgstr "版本号：暂无"
 
 #: kylin-installer.py:370 kylin-installer.py:363 kylin-installer.py:324

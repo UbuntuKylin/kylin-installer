@@ -1,3 +1,9 @@
+kylin-installer (0.1.8kord) v100; urgency=medium
+
+  * 修复version的翻译问题
+
+ -- lijiang (rain) <lijiang@kylinos.cn>  Thu, 26 Nov 2020 11:29:45 +0800
+
 kylin-installer (0.1.7kord) v100; urgency=medium
 
   * 修改上个版本命令行安装失败的问题
