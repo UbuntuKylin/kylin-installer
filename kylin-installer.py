@@ -290,7 +290,7 @@ class Example(QWidget):
             self.uninstall_version = _("version: ") + pkg.versions.keys()[0]
         if LAUNCH_MODE == 'normal':
             self.ui.install.setText(_("installation"))
-            self.adaptiveLength(_("select an installation file"), _("version：no"))  # 设置包名、版本信息
+            self.adaptiveLength(_("select an installation file"), _("version: no"))  # 设置包名、版本信息
         elif LAUNCH_MODE == 'manual':
             self.ui.install.setText(_("installation"))
             self.ui.install.clicked.connect(self.install_debfile)
