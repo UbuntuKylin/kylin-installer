@@ -545,7 +545,7 @@ class Example(QWidget):
         if str(os.getenv("QT_QPA_PLATFORMTHEME")) == "ukui":
             if os.path.exists("/etc/kylin-build"):
                 fp = open("/etc/kylin-build")
-                if fp.read().split(" ")[1].strip("\n") != "V10":
+                if fp.readlines()[0].strip("\n").split(" ")[1] != "V10":
                     self.UKUI3 = True
                     self.ui.closeButton.setIcon(QIcon.fromTheme("window-close-symbolic"))
                     self.ui.minButton.setIcon(QIcon.fromTheme("window-minimize-symbolic"))
