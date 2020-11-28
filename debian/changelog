@@ -1,3 +1,10 @@
+kylin-installer (0.1.9kord) v100; urgency=medium
+
+  * 修改ukui3主题是否存在的判断方式
+  * 修改kylin-settings配置文件，支持默认双击打开
+
+ -- lijiang (rain) <lijiang@kylinos.cn>  Sat, 28 Nov 2020 14:54:44 +0800
+
 kylin-installer (0.1.8kord) v100; urgency=medium
 
   * 修复version的翻译问题
