@@ -1,1 +1,9 @@
 chmod 755 /usr/lib/python3/dist-packages/kylin_packages_manager_tools_daemon/start_systemdbus.py
+#修改双击默认的ubuntu-kylin-software-center为kylin-installer
+if [ -e /usr/share/applications/defaults.list ];then
+    sed -i 's/ubuntu-kylin-software-center/kylin-installer/g' /usr/share/applications/defaults.list
+fi
+
+if [ -e /usr/share/applications/mate/defaults.list ];then
+    sed -i 's/ubuntu-kylin-software-center/kylin-installer/g' /usr/share/applications/defaults.list
+fi
