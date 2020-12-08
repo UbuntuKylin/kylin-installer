@@ -25,7 +25,7 @@ Conflicts: install-debfile
 Recommends: language-pack-zh-hans
 Breaks: ubuntu-kylin-software-center-common
 Replaces: ubuntu-kylin-software-center-common
-Description: Just a test
+Description: Used to install and uninstall packages
  .
  Features:
   * Categorized and selected applications for users

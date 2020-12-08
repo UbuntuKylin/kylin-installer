@@ -1,3 +1,13 @@
+kylin-installer (0.2.0kord) v100; urgency=medium
+
+  * 卸载软件时增加了软件是否正在使用的判断
+  * 修复安装百度网盘后点击“立即体验”不生效的问题
+  * 修复v10.1上4k不生效的问题
+  * 修复安装brower360界面显示不全的问题
+  * 修复包的描述信息不规范的问题
+
+ -- lijiang (rain) <lijiang@kylinos.cn>  Sat, 05 Dec 2020 17:41:51 +0800
+
 kylin-installer (0.1.9kord) v100; urgency=medium
 
   * 修改ukui3主题是否存在的判断方式
