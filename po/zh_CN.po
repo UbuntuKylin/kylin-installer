@@ -119,3 +119,15 @@ msgstr "一键卸载"
 #: kylin-installer.py:489
 msgid "removed"
 msgstr "已卸载"
+
+#: kylin-installer.py:489
+msgid "The current software is in use, please exit normally before uninstalling"
+msgstr "当前软件正在使用，请正常退出后再卸载"
+
+#: kylin-installer.py:489
+msgid "Uninstall the warning"
+msgstr "卸载警告"
+
+#: kylin-installer.py:489
+msgid "OK"
+msgstr "确定"
