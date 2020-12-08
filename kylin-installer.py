@@ -20,6 +20,7 @@ import math
 from apt.debfile import DebPackage
 from ui.config import File_window
 from utils.debfile import DebFile
+from utils.utils_func import check_proc_exist
 from utils import get_icon
 from ui.messagebox import MessageBox
 from ui.enums import AppActions
@@ -81,7 +82,7 @@ class parseThread(QThread, QObject):
         if os.path.exists(self.desktop_path):
             setting = QSettings(self.desktop_path, QSettings.IniFormat)
             setting.beginGroup("Desktop Entry")
-            exec_word = str(setting.value("Exec")).split(" ")[0]
+            exec_word = str(setting.value("Exec")).split(" ")[0].split("%")[0]
         #不存在同名的desktop文件则进行deb包解析
         else:
             self.debfile = DebPackage(LOCAL_DEB_FILE)
@@ -90,7 +91,7 @@ class parseThread(QThread, QObject):
                     self.desktop = desktop
                     setting = QSettings("/" + self.desktop, QSettings.IniFormat)
                     setting.beginGroup("Desktop Entry")
-                    exec_word = str(setting.value("Exec")).split(" ")[0]
+                    exec_word = str(setting.value("Exec")).split(" ")[0].split("%")[0]
         self.parse_over.emit(exec_word)
 
 class Example(QWidget):
@@ -262,8 +263,17 @@ class Example(QWidget):
     #
     # 函數：卸载软件
     #
-    def remove(self):
-        self.work.start()
+    def remove(self, name):
+        if check_proc_exist(name):
+            qb = QMessageBox(self)
+            qb.setIcon(QMessageBox.Question)
+            qb.setWindowTitle("卸载警告")
+            qb.setText("当前软件正在使用，请正常退出后再卸载")
+            qb.addButton(QPushButton(_("OK")), QMessageBox.YesRole)
+            rtn = qb.exec_()
+            self.slot_close()
+        else:
+            self.work.start()
 
     #
     # 函数：安装软件
@@ -301,7 +311,7 @@ class Example(QWidget):
         elif LAUNCH_MODE == 'remove':
             if pkg.is_installed:
                 self.ui.install.setText(_("uninstallation"))
-                self.ui.install.clicked.connect(self.remove)
+                self.ui.install.clicked.connect(lambda : self.remove(pkg.name))
                 self.adaptiveLength(self.uninstall_pkgname, self.uninstall_version)  # 设置包名、版本信息
                 iconpath = get_icon.get_icon_path(str(self.uninstall_pkgname))
                 if iconpath:
@@ -310,7 +320,7 @@ class Example(QWidget):
                 self.ui.install.setText(_("uninstalled"))
                 self.ui.install.setStyleSheet("QPushButton{background-color:#A9A9A9;border:0px;font-size:16px;border-radius:4px;color:#ffffff}")
                 self.ui.install.setEnabled(False)
-                self.adaptiveLength(_("version：no"), _("software not installed"))  # 设置包名、版本信息
+                self.adaptiveLength(_("version: no"), _("software not installed"))  # 设置包名、版本信息
                 iconpath = get_icon.get_icon_path(self.uninstall_version)
                 if iconpath:
                     self.ui.icon.setStyleSheet("QLabel{background-image:url('" + iconpath + "');background-color:transparent;background-position:center;background-repeat:none}")
@@ -321,9 +331,9 @@ class Example(QWidget):
     def adaptiveLength(self, name_text, version_text):
         self.ui.pkgname.setText(name_text)
         self.ui.version.setText(version_text)
-        #获取当前label内容的总长度
-        name_width = self.ui.pkgname.fontMetrics().boundingRect(self.ui.pkgname.text()).width()
-        version_width = self.ui.version.fontMetrics().boundingRect(self.ui.version.text()).width()
+        #获取当前label内容的总长度（注：为什么存在数字时获取到的长度）
+        name_width = self.ui.pkgname.fontMetrics().boundingRect(self.ui.pkgname.text()).width() + 4
+        version_width = self.ui.version.fontMetrics().boundingRect(self.ui.version.text()).width() + 4
         self.ui.pkgname.setFixedSize(name_width, 30)
         self.ui.version.setFixedSize(version_width, 15)
         #根据长度自动进行调整外框大小
@@ -610,11 +620,15 @@ if __name__ == "__main__":
     #4k判断
     cmd = "dpkg -l | grep libqt5gui | awk '{print $3}'"
     version = os.popen(cmd).readline().strip("\n")
-    if ("~" in version):
-        if ("k" in version.split("~")[1]):
-            if (int(version.split("~")[1].split("k")[1]) >= 4):
-                QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
-                QCoreApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
+    if version.startswith("5.6"):
+        if ("~" in version):
+            if ("k" in version.split("~")[1]):
+                if (int(version.split("~")[1].split("k")[1]) >= 4):
+                    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
+                    QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
+    else:
+        QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
+        QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
     app = QApplication(sys.argv)
     QApplication.setApplicationName(_("kylin-application-installer"))
     QApplication.setWindowIcon(QIcon("res/kylin-installer-64.svg"))
@@ -625,7 +639,15 @@ if __name__ == "__main__":
         arg = sys.argv[1]
         if(arg == '-quiet'):
             LAUNCH_MODE = 'quiet'
-        elif(arg == '-remove'):
+        elif(arg == '-remove '):
+            if check_proc_exist(sys.argv[2]):
+                qb = QMessageBox()
+                qb.setIcon(QMessageBox.Warning)
+                qb.setWindowTitle(_("Uninstall the warning"))
+                qb.setText(_("The current software is in use, please exit normally before uninstalling"))
+                qb.addButton(QPushButton(_("OK")), QMessageBox.YesRole)
+                rtn = qb.exec_()
+                sys.exit(0)
             if(sys.argv[2]):
                 LAUNCH_MODE = 'remove'
                 REMOVE_SOFT = sys.argv[2]
